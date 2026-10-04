@@ -1,0 +1,65 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PSLauncher"
+    xmlns:views="clr-namespace:PSLauncher.Views">
+
+    <!-- Window Border Style -->
+    <Style x:Key="WindowBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ApplicationBackgroundBrush}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="12"/>
+    </Style>
+
+    <!-- PSLauncher Icon Style -->
+    <Style x:Key="PSLauncherImageStyle" TargetType="Image">
+        <Setter Property="Source" Value="/powershell-blue.ico"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- CommandBox Style -->
+    <Style x:Key="CommandBoxStyle" TargetType="RichTextBox" BasedOn="{StaticResource DefaultRichTextBoxStyle}">
+        <Setter Property="FontSize" Value="24"/>
+    </Style>
+
+    <!-- Stop Runspace Button Style -->
+    <Style x:Key="StopRunspaceButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="IsEnabled" Value="False"/>
+        <Setter Property="ToolTip" Value="Stop"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Width="16" Height="16">
+                        <Path Name="rect" Fill="Red" Data="M 2,2 L 14,2 L 14,14 L 2,14 Z"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="rect" Property="Fill" Value="LimeGreen"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Result Templates -->
+    <DataTemplate x:Key="StringTemplate">
+        <views:StringResultView/>
+    </DataTemplate>
+    <DataTemplate x:Key="ObjectTemplate">
+        <views:ObjectResultView/>
+    </DataTemplate>
+    <DataTemplate x:Key="FilesTemplate">
+        <views:FileSystemResultView/>
+    </DataTemplate>
+    <views:ResultTemplateSelector x:Key="ResultTemplateSelector"
+                                  StringTemplate="{StaticResource StringTemplate}"
+                                  ObjectTemplate="{StaticResource ObjectTemplate}"
+                                  FilesTemplate="{StaticResource FilesTemplate}"
+                                  />
+</ResourceDictionary>

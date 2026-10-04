@@ -1,0 +1,71 @@
+<Window x:Name="window" x:Class="PSLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PSLauncher"
+        mc:Ignorable="d"
+        Title="PSLauncher"
+        MaxWidth="800"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Loaded="Window_Loaded"
+        MouseDown="Window_MouseDown"
+        SizeToContent="WidthAndHeight"
+        Background="Transparent"
+        ThemeMode="Dark"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/MainWindow.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Command="ApplicationCommands.Close" Key="F4" Modifiers="Alt"/>
+        <KeyBinding Command="local:Commands.FocusToResultContent" Key="R" Modifiers="Alt"/>
+    </Window.InputBindings>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Close" Executed="ExitApplication"/>
+        <CommandBinding Command="local:Commands.FocusToResultContent" Executed="FocusToResultContent"/>
+    </Window.CommandBindings>
+
+    <Border Style="{StaticResource WindowBorderStyle}">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto">
+            <Grid Grid.Row="0" ColumnDefinitions="40, *">
+                <Grid Grid.Column="0">
+                    <Image Style="{StaticResource PSLauncherImageStyle}"/>
+                    <Label Content="_C" Target="{Binding ElementName=CommandBox}" Opacity="0" IsTabStop="False" Focusable="False"/>
+                    <Grid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="ApplicationCommands.Close"/>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
+                </Grid>
+                <RichTextBox x:Name="CommandBox" Grid.Column="1" Style="{StaticResource CommandBoxStyle}"
+                             Background="#333"
+                             InputMethod.PreferredImeState="Off"
+                             PreviewKeyDown="CommandBox_PreviewKeyDown"
+                             TextChanged="CommandBox_TextChanged"/>
+            </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto">
+                <Label Grid.Column="0" Content="_Location:" Target="{Binding ElementName=LocationBox}" VerticalAlignment="Center"/>
+                <ComboBox x:Name="LocationBox" Grid.Column="1"
+                          IsEditable="True" IsReadOnly="False"
+                          PreviewKeyDown="LocationBox_PreviewKeyDown"
+                          PreviewMouseLeftButtonUp="LocationBox_PreviewMouseLeftButtonUp"/>
+                <Button x:Name="StopRunspaceButton" Grid.Column="2" Style="{StaticResource StopRunspaceButtonStyle}"
+                        Click="StopRunspace"/>
+            </Grid>
+
+            <ContentControl x:Name="ResultContent" Grid.Row="2"
+                            Focusable="False"
+                            ContentTemplateSelector="{StaticResource ResultTemplateSelector}"/>
+        </Grid>
+    </Border>
+</Window>

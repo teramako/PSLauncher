@@ -1,0 +1,53 @@
+<Window x:Name="window" x:Class="PSLauncher.CompletionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PSLauncher"
+        mc:Ignorable="d"
+        Title="CompletionWindow"
+        MaxWidth="600"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        BorderThickness="0"
+        ShowInTaskbar="False"
+        Topmost="True"
+        SizeToContent="WidthAndHeight"
+        Loaded="Window_Loaded"
+        IsVisibleChanged="Window_IsVisibleChanged"
+        ThemeMode="Dark"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/CompletionWindow.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Border Style="{StaticResource WindowBorderStyle}">
+        <StackPanel Orientation="Vertical">
+            <TextBlock Name="HeaderLabel" Text="Completion" FontSize="8"/>
+            <ListBox x:Name="CompletionList" Style="{StaticResource CompletionListBoxStyle}"
+                     ItemContainerStyle="{StaticResource CompletionListBoxItemStyle}"
+                     SelectionChanged="OnSelectionChanged"
+                     MouseDoubleClick="OnDoubleClick"
+                     >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding ListItemText}" ToolTip="{Binding ToolTip}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Popup x:Name="DetailPopup"
+                   Placement="Right"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   PopupAnimation="Fade">
+                <Border Style="{StaticResource TooltipPopupBorderStyle}">
+                    <TextBlock x:Name="DetailText" Style="{StaticResource TooltipTextBlockStyle}"/>
+                </Border>
+            </Popup>
+        </StackPanel>
+    </Border>
+</Window>

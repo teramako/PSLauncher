@@ -1,0 +1,37 @@
+<UserControl x:Class="PSLauncher.Views.StringResultView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PSLauncher.Views"
+             xmlns:model="clr-namespace:PSLauncher.Models"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=model:ResultList}"
+             d:DesignHeight="100" d:DesignWidth="800">
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Label Content="_Result:"/>
+            <TextBlock Text="{Binding Description, FallbackValue=&lt;none&gt;}" Padding="5,0,0,0"/>
+        </StackPanel>
+        <DockPanel>
+            <TextBox Name="ResultText"
+                     IsReadOnly="True" IsReadOnlyCaretVisible="True"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                     MaxHeight="600"
+                     FontFamily="Consolas"
+                     FontSize="23"
+                     Text="{Binding DisplayData, Mode=OneWay, FallbackValue=&lt;none&gt;}"
+                     TextWrapping="Wrap"
+                     />
+            <DockPanel.Style>
+                <Style TargetType="DockPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasDisplayData}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DockPanel.Style>
+        </DockPanel>
+    </StackPanel>
+</UserControl>

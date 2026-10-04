@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="PopupBackgroundColor">#2C2C2C</Color>
+    <SolidColorBrush x:Key="PopupBackgroundBrush" Color="{DynamicResource PopupBackgroundColor}"/>
+    <Style x:Key="WindowBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ApplicationBackgroundBrush}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource PopupCornerRadius}"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrongFillColorBrush}"/>
+    </Style>
+    <Style x:Key="CompletionListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+        <Setter Property="MaxHeight" Value="400"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style x:Key="CompletionListBoxItemStyle"  TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+        <Setter Property="MinHeight" Value=""/>
+        <Setter Property="Padding" Value="4,0"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Border.CornerRadius" Value="{StaticResource ControlCornerRadius}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="TooltipPopupBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource PopupBackgroundBrush}"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="CornerRadius" Value="{StaticResource PopupCornerRadius}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}"/>
+    </Style>
+    <Style x:Key="TooltipTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="MinWidth" Value="300"/>
+        <Setter Property="MaxWidth" Value="600"/>
+    </Style>
+</ResourceDictionary>
