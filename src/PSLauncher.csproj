@@ -1,24 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ApplicationIcon>powershell-blue.ico</ApplicationIcon>
+        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-	<UseWindowsForms>true</UseWindowsForms>
-	<ApplicationIcon>powershell-blue.ico</ApplicationIcon>
-	<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+    <ItemGroup>
+        <Content Include="powershell-blue.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="powershell-blue.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-	  <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.*" PrivateAssets="all" ExcludeAssets="runtime" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.*" PrivateAssets="all" ExcludeAssets="runtime" />
+    </ItemGroup>
 </Project>
