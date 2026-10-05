@@ -143,6 +143,27 @@ public partial class CompletionWindow : Window
     }
 
     /// <summary>
+    /// Move down or up through the selection list by 1 page * <paramref name="factor"/>.
+    /// </summary>
+    /// <param name="down"></param>
+    /// <param name="factor"></param>
+    private void MovePage(bool down, double factor)
+    {
+        if (!CompletionList.TryFindChild<ScrollViewer>(out var sv))
+            return;
+
+        double offset = sv.VerticalOffset + (down ? 1 : -1) * sv.ViewportHeight * factor;
+        sv.ScrollToVerticalOffset(offset);
+
+        int currentIndex = CompletionList.SelectedIndex;
+        int delta = (int)(sv.ViewportHeight * factor);
+        CompletionList.SelectedIndex = Math.Clamp(currentIndex + (down ? delta : -delta),
+                                                  0,
+                                                  CurrentCommandCompletion.CompletionMatches.Count - 1);
+        ScrollIntoView(CompletionList.SelectedIndex);
+    }
+
+    /// <summary>
     /// DispatcherTimer to show the detail popup for the selected item in the completion list
     /// </summary>
     private DispatcherTimer? PopupTimer;
@@ -247,6 +268,20 @@ public partial class CompletionWindow : Window
             case Key.P when Keyboard.Modifiers is ModifierKeys.Control:
             case Key.Tab when Keyboard.Modifiers is ModifierKeys.Shift:
                 SelectPrevious();
+                return true;
+            case Key.PageDown:
+            case Key.F when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(true, 1);
+                return true;
+            case Key.PageUp:
+            case Key.B when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(false, 1);
+                return true;
+            case Key.D when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(true, 0.5);
+                return true;
+            case Key.U when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(false, 0.5);
                 return true;
         }
         return false;
