@@ -65,7 +65,7 @@ public partial class ObjectResultView : UserControl, IResultContentControl
 
     private void ResultGridCell_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
-        if (!WpfUtils.TryFindParent<DataGridCell, DataGrid>(e.OriginalSource as DependencyObject, out var cell))
+        if (!(e.OriginalSource as DependencyObject).TryFindParent<DataGridCell, DataGrid>(out var cell))
             return;
 
         if (cell.DataContext is not ResultData row)

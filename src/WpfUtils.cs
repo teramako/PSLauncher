@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace PSLauncher;
 
-internal class WpfUtils
+internal static class WpfUtils
 {
     /// <summary>
     /// Travels upward through the visual tree from the specified <paramref name="child"/> node,
@@ -30,7 +30,7 @@ internal class WpfUtils
     /// Use <see cref="VisualTreeHelper.GetParent(DependencyObject)"/> to retrieve the parent element in the visual tree.
     /// If the specified type is not found even after traversing to the root, returns null.
     /// </remarks>
-    public static bool TryFindParent<T>(DependencyObject? child,
+    public static bool TryFindParent<T>(this DependencyObject? child,
                                         [MaybeNullWhen(false)] out T parent)
         where T : DependencyObject
     {
@@ -72,7 +72,7 @@ internal class WpfUtils
     /// <remarks>
     /// Boundary types are not included in the search. This is used, for example, when you want to terminate the search at a window or a specific container.
     /// </remarks>
-    public static bool TryFindParent<T, TUntil>(DependencyObject? child,
+    public static bool TryFindParent<T, TUntil>(this DependencyObject? child,
                                                 [MaybeNullWhen(false)] out T parent)
         where T : DependencyObject
         where TUntil : DependencyObject
@@ -107,7 +107,8 @@ internal class WpfUtils
     /// Returns true if a child element of the specified type is found, and sets the corresponding element to <paramref name="child"/>.
     /// Returns false if none is found.
     /// </returns>
-    public static bool TryFindChild<T>(DependencyObject? parent, [MaybeNullWhen(false)] out T child)
+    public static bool TryFindChild<T>(this DependencyObject? parent,
+                                       [MaybeNullWhen(false)] out T child)
         where T : DependencyObject
     {
         if (parent is null)
@@ -124,7 +125,7 @@ internal class WpfUtils
                 child = t;
                 return true;
             }
-            if (TryFindChild(currentChild, out child))
+            if (currentChild.TryFindChild(out child))
             {
                 return true;
             }

@@ -57,7 +57,7 @@ public partial class MainWindow
         if (!LocationBox.IsDropDownOpen)
             return;
 
-        if (WpfUtils.TryFindParent<ComboBoxItem, ComboBox>(e.OriginalSource as DependencyObject, out var item))
+        if ((e.OriginalSource as DependencyObject).TryFindParent<ComboBoxItem, ComboBox>(out var item))
         {
             e.Handled = true;
             SelectionComfirmedOnLocationBox(item.DataContext as string);

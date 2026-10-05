@@ -53,7 +53,7 @@ public partial class FileSystemResultView : UserControl, IResultContentControl
 
     private void ResultData_RowKeyDown(object sender, KeyEventArgs e)
     {
-        if (!WpfUtils.TryFindParent<DataGrid>(sender as DependencyObject, out var dataGrid))
+        if (!(sender as DependencyObject).TryFindParent<DataGrid>(out var dataGrid))
             return;
 
         var data = DataContext as ResultList;

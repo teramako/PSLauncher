@@ -146,8 +146,8 @@ public partial class MainWindow : Window
 
     private void FocusToResultContent(object sender, ExecutedRoutedEventArgs e)
     {
-        if (WpfUtils.TryFindChild<ContentPresenter>(ResultContent, out var contentPresenter)
-            && WpfUtils.TryFindChild<UserControl>(contentPresenter, out var control))
+        if (ResultContent.TryFindChild<ContentPresenter>(out var contentPresenter)
+            && contentPresenter.TryFindChild<UserControl>(out var control))
         {
             if (control is IResultContentControl resultControl)
             {
