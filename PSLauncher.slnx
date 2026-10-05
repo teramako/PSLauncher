@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="PSLauncher.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/PSLauncher.csproj" />
+  </Folder>
 </Solution>
