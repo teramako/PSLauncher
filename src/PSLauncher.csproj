@@ -12,9 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="powershell-blue.ico">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
+        <Resource Include="powershell-blue.ico" />
     </ItemGroup>
 
     <ItemGroup>

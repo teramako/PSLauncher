@@ -129,9 +129,11 @@ public partial class App : Application
 
     private void InitializeNotifyIcon()
     {
+        var startInfo = GetResourceStream(new Uri("powershell-blue.ico", UriKind.Relative));
+        using var iconStream = startInfo.Stream;
         NotifyIcon = new System.Windows.Forms.NotifyIcon()
         {
-            Icon = System.Drawing.Icon.ExtractAssociatedIcon("powershell-blue.ico"),
+            Icon = new System.Drawing.Icon(iconStream, new System.Drawing.Size(16, 16)),
             Visible = true,
             Text = "PSLauncher"
         };
