@@ -194,4 +194,18 @@ internal static class WpfUtils
         return pointer;
     }
     #endregion
+
+    /// <summary>
+    /// Centers the selected item within the ScrollViewer's viewport
+    /// using logical (item-based) scrolling of VirtualizingStackPanel.
+    /// </summary>
+    /// <param name="scrollViewer"></param>
+    /// <param name="selectedIndex"></param>
+    public static void ScrollSelectedIndexToCenterLogical(this ScrollViewer scrollViewer, int selectedIndex)
+    {
+        var offset = Math.Clamp(selectedIndex - (scrollViewer.ViewportHeight / 2),
+                                0,
+                                scrollViewer.ScrollableHeight);
+        scrollViewer.ScrollToVerticalOffset(offset);
+    }
 }
