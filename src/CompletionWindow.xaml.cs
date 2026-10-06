@@ -66,6 +66,9 @@ public partial class CompletionWindow : Window
 
         HwndSource source = HwndSource.FromHwnd(hwnd);
         source.AddHook(WndProc);
+
+        // Set ScrollViewer in the CompletionList(ListBox)
+        CompletionList.TryFindChild<ScrollViewer>(out _completionScrollViewer);
     }
 
     /// <summary>
@@ -132,6 +135,11 @@ public partial class CompletionWindow : Window
     }
 
     /// <summary>
+    /// ScrollViewer in the <seealso cref="CompletionList"/>.
+    /// </summary>
+    private ScrollViewer? _completionScrollViewer;
+
+    /// <summary>
     /// Scroll the selected item into view in the completion list
     /// </summary>
     /// <param name="index"></param>
@@ -149,18 +157,17 @@ public partial class CompletionWindow : Window
     /// <param name="factor"></param>
     private void MovePage(bool down, double factor)
     {
-        if (!CompletionList.TryFindChild<ScrollViewer>(out var sv))
+        if (_completionScrollViewer is null)
             return;
-
-        double offset = sv.VerticalOffset + (down ? 1 : -1) * sv.ViewportHeight * factor;
-        sv.ScrollToVerticalOffset(offset);
+        var sv = _completionScrollViewer;
 
         int currentIndex = CompletionList.SelectedIndex;
         int delta = (int)(sv.ViewportHeight * factor);
-        CompletionList.SelectedIndex = Math.Clamp(currentIndex + (down ? delta : -delta),
-                                                  0,
-                                                  CurrentCommandCompletion.CompletionMatches.Count - 1);
-        ScrollIntoView(CompletionList.SelectedIndex);
+        var index = Math.Clamp(currentIndex + (down ? delta : -delta),
+                               0,
+                               CurrentCommandCompletion.CompletionMatches.Count - 1);
+        sv.ScrollSelectedIndexToCenterLogical(index);
+        CompletionList.SelectedIndex = index;
     }
 
     /// <summary>
