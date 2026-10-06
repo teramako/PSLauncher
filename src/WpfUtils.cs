@@ -155,7 +155,7 @@ internal static class WpfUtils
     /// Please note that the result may differ from the intuitive “character count”
     /// due to inline elements, ligatures, surrogate pairs, and other factors within rich text.
     /// </remarks>
-    /// <value>The character offset of the caret within the current line (starting at 0)</value>
+    /// <returns>The character offset of the caret within the current line (starting at 0)</returns>
     public static int GetCaretIndex(RichTextBox richTextBox)
 
     {
