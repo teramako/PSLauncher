@@ -1,6 +1,5 @@
 using PSLauncher.Models;
 using PSLauncher.Views;
-using System.Collections;
 using System.ComponentModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
