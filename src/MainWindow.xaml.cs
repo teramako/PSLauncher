@@ -101,7 +101,9 @@ public partial class MainWindow : Window
         {
             ps.Commands.Clear();
             ps.AddScript(script);
+            ElapsedTimeControl.Start();
             var results = await ps.InvokeAsync();
+            ElapsedTimeControl.Stop();
             ShowResult(results);
         }
         catch (PipelineStoppedException)

@@ -1,0 +1,13 @@
+<UserControl x:Class="PSLauncher.Views.ElapsedTimeControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PSLauncher.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="32" d:DesignWidth="100"
+             x:Name="root">
+    <StatusBarItem x:Name="ElapsedTimeStatus"
+                   Content="{Binding Elapsed, ElementName=root}"
+                   ContentStringFormat="mm\:ss\.ff"/>
+</UserControl>

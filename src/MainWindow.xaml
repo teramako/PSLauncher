@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PSLauncher"
+        xmlns:view="clr-namespace:PSLauncher.Views"
         mc:Ignorable="d"
         Title="PSLauncher"
         MaxWidth="800"
@@ -68,6 +69,7 @@
                 <StatusBarItem>
                     <Button x:Name="StopRunspaceButton" Style="{StaticResource StopRunspaceButtonStyle}" Click="StopRunspace"/>
                 </StatusBarItem>
+                <view:ElapsedTimeControl x:Name="ElapsedTimeControl"/>
             </StatusBar>
         </Grid>
     </Border>
