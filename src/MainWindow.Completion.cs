@@ -13,6 +13,11 @@ public partial class MainWindow
     private CompletionWindow? _completionWindow;
 
     /// <summary>
+    /// <seealso cref="PowerShell"/> instance for completion (TabExpansion2)
+    /// </summary>
+    private PowerShell? _completionPowerShell;
+
+    /// <summary>
     /// Gets a value indicating whether the completion window is visible.
     /// </summary>
     [MemberNotNullWhen(true, nameof(_completionWindow))]
@@ -116,10 +121,9 @@ public partial class MainWindow
             offset = CommandPrefix.Length;
         }
 
-        using var ps = PowerShell.Create(App.Runspace);
+        var ps = _completionPowerShell ??= PowerShell.Create(App.Runspace);
         try
         {
-            ps.Commands.Clear();
             var results = ps.AddCommand("TabExpansion2")
                             .AddParameter("inputScript", script)
                             .AddParameter("cursorColumn", cursorPos + offset)
@@ -132,6 +136,11 @@ public partial class MainWindow
         }
         catch
         {
+        }
+        finally
+        {
+            ps.Commands.Clear();
+            ps.Streams.ClearStreams();
         }
         return null;
     }

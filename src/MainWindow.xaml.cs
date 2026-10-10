@@ -96,14 +96,12 @@ public partial class MainWindow : Window
         {
             script = $@"{CommandPrefix} {script[1..]}";
         }
-        using var ps = _currentPowerShell = PowerShell.Create(App.Runspace);
+        var ps = _currentPowerShell = PowerShell.Create(App.Runspace);
         try
         {
             ps.Commands.Clear();
             ps.AddScript(script);
             var results = await ps.InvokeAsync();
-
-            UpdateStatus();
             ShowResult(results);
         }
         catch (PipelineStoppedException)
@@ -116,7 +114,7 @@ public partial class MainWindow : Window
         }
         finally
         {
-            _currentPowerShell = null;
+            UpdateStatus();
         }
     }
 
