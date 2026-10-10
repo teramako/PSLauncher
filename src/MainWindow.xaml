@@ -70,6 +70,8 @@
                     <Button x:Name="StopRunspaceButton" Style="{StaticResource StopRunspaceButtonStyle}" Click="StopRunspace"/>
                 </StatusBarItem>
                 <view:ElapsedTimeControl x:Name="ElapsedTimeControl"/>
+                <Separator/>
+                <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
             </StatusBar>
         </Grid>
     </Border>

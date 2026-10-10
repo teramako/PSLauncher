@@ -96,10 +96,26 @@ public partial class MainWindow : Window
         {
             script = $@"{CommandPrefix} {script[1..]}";
         }
-        var ps = _currentPowerShell = PowerShell.Create(App.Runspace);
+        var es = ExecutionStatus;
+        PowerShell ps;
+        if (_currentPowerShell is null)
+        {
+            ps = _currentPowerShell = PowerShell.Create(App.Runspace);
+            ps.Streams.Error.DataAdded += (s, e) => es.AddRecord<ErrorRecord>(es.ErrorList, s, e);
+            ps.Streams.Warning.DataAdded += (s, e) => es.AddRecord<WarningRecord>(es.WarningList, s, e);
+            ps.Streams.Verbose.DataAdded += (s, e) => es.AddRecord<VerboseRecord>(es.VerboseList, s, e);
+            ps.Streams.Information.DataAdded += (s, e) => es.AddRecord<InformationRecord>(es.InformationList, s, e);
+            ps.Streams.Debug.DataAdded += (s, e) => es.AddRecord<DebugRecord>(es.DebugList, s, e);
+        }
+        else
+        {
+            es.ClearStreams();
+            ps = _currentPowerShell;
+            ps.Commands.Clear();
+            ps.Streams.ClearStreams();
+        }
         try
         {
-            ps.Commands.Clear();
             ps.AddScript(script);
             ElapsedTimeControl.Start();
             var results = await ps.InvokeAsync();
