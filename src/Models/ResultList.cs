@@ -8,12 +8,12 @@ namespace PSLauncher.Models;
 
 public class ResultList
 {
-    public required object? RootObject { get; init; }
+    public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
     public string DisplayData { get; init; } = string.Empty;
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
     public ResultDataKind Kind { get; init; } = ResultDataKind.Null;
-    public ObservableCollection<IResultData>? Items { get; init; }
+    public ObservableCollection<IResultData> Items { get; init; } = [];
 
     /// <summary>
     /// Expands the row at the specified index and inserts its child rows into the collection.
