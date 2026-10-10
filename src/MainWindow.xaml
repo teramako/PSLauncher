@@ -53,19 +53,22 @@
                              PreviewKeyDown="CommandBox_PreviewKeyDown"
                              TextChanged="CommandBox_TextChanged"/>
             </Grid>
-            <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto">
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *">
                 <Label Grid.Column="0" Content="_Location:" Target="{Binding ElementName=LocationBox}" VerticalAlignment="Center"/>
                 <ComboBox x:Name="LocationBox" Grid.Column="1"
                           IsEditable="True" IsReadOnly="False"
                           PreviewKeyDown="LocationBox_PreviewKeyDown"
                           PreviewMouseLeftButtonUp="LocationBox_PreviewMouseLeftButtonUp"/>
-                <Button x:Name="StopRunspaceButton" Grid.Column="2" Style="{StaticResource StopRunspaceButtonStyle}"
-                        Click="StopRunspace"/>
             </Grid>
 
             <ContentControl x:Name="ResultContent" Grid.Row="2"
                             Focusable="False"
                             ContentTemplateSelector="{StaticResource ResultTemplateSelector}"/>
+            <StatusBar Grid.Row="3" Padding="2">
+                <StatusBarItem>
+                    <Button x:Name="StopRunspaceButton" Style="{StaticResource StopRunspaceButtonStyle}" Click="StopRunspace"/>
+                </StatusBarItem>
+            </StatusBar>
         </Grid>
     </Border>
 </Window>
