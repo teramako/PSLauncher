@@ -32,54 +32,8 @@
             </DockPanel.Style>
         </DockPanel>
         <Expander x:Name="DetailExpander" Header="_Detail:"
-            IsExpanded="True" MaxHeight="600" Style="{StaticResource CompactExpanderStyle}">
-            <DataGrid x:Name="ResultGrid"
-                      MaxHeight="600"
-                      AutoGenerateColumns="False"
-                      SelectionMode="Single"
-                      SelectionUnit="FullRow"
-                      VerticalScrollBarVisibility="Auto"
-                      HeadersVisibility="Column"
-                      ContextMenuOpening="ResultGridCell_ContextMenuOpening"
-                      GotFocus="ResultGrid_GotFocus"
-                      PreviewKeyDown="ResultData_RowKeyDown"
-                      ItemsSource="{Binding Items}"
-                      >
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Name" Width="auto" SortMemberPath="Name">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top" >
-                                    <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
-                                                      Click="ResultData_Click"/>
-                                    <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
-                                </DockPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}">
-                                    <Border Width="16"/>
-                                    <TextBox Text="{Binding Name, Mode=OneTime}"/>
-                                </DockPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Value" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" MaxHeight="35"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <TextBox Text="{Binding RawValue, Mode=OneTime}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="auto"/>
-                </DataGrid.Columns>
-            </DataGrid>
+                  IsExpanded="True" MaxHeight="600" Style="{StaticResource CompactExpanderStyle}">
+            <local:ObjectGridDataView x:Name="ResultGrid" DataContext="{Binding}"/>
         </Expander>
     </StackPanel>
 </UserControl>
