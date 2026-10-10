@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Management.Automation;
 using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultList
+public class ResultList : INotifyPropertyChanged
 {
     public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
@@ -14,6 +15,47 @@ public class ResultList
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
     public ResultDataKind Kind { get; init; }
     public ObservableCollection<IResultData> Items { get; init; } = [];
+
+    /// <summary>
+    /// Count of root items
+    /// </summary>
+    public int Count
+    {
+        get
+        {
+            if (field < 0)
+            {
+                field = Items.Count(item => item.Level == 0);
+            }
+            return field;
+        }
+        private set
+        {
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Count)));
+        }
+    } = -1;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void Append(IResultData data)
+    {
+        Items.Add(data);
+        Count += 1;
+    }
+
+    public void Append(object? data)
+    {
+        var c = Count;
+        Items.Add(new ResultData($"[{c}]", data));
+        Count = c + 1;
+    }
+
+    public void Clear()
+    {
+        Count = 0;
+        Items.Clear();
+    }
 
     /// <summary>
     /// Expands the row at the specified index and inserts its child rows into the collection.
