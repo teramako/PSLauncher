@@ -12,7 +12,7 @@ public class ResultList
     public string Description { get; init; } = string.Empty;
     public string DisplayData { get; init; } = string.Empty;
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
-    public ResultDataKind Kind { get; init; } = ResultDataKind.Null;
+    public ResultDataKind Kind { get; init; }
     public ObservableCollection<IResultData> Items { get; init; } = [];
 
     /// <summary>
@@ -194,12 +194,7 @@ public class ResultList
     {
         if (obj is null)
         {
-            return new ResultList
-            {
-                RootObject = null,
-                Kind = ResultDataKind.Null,
-                Description = "(null)"
-            };
+            return null;
         }
         var baseType = Utils.GetTypeName(obj.GetType());
         return obj switch

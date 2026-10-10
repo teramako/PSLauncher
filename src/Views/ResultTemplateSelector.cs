@@ -18,7 +18,6 @@ public class ResultTemplateSelector : DataTemplateSelector
         }
         return results.Kind switch
         {
-            ResultDataKind.Null => null,
             ResultDataKind.Simple => StringTemplate,
             ResultDataKind.Files => FilesTemplate,
             _ => ObjectTemplate,
