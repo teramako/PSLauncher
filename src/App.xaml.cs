@@ -1,7 +1,7 @@
 using Microsoft.Win32;
+using PSLauncher.Shell;
 using System.Diagnostics;
 using System.IO;
-using System.Management.Automation.Runspaces;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -98,15 +98,13 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        if (_isRunspaceCreated)
+        try
         {
-            try
-            {
-                Runspace.Close();
-            }
-            catch { /* ignore */ }
-            Runspace.Dispose();
+            RunspaceManager.SubRunspace.Dispose();
+            RunspaceManager.MainRunspace.Dispose();
         }
+        catch { /* ignore */ }
+
         if (MainWindow is not null)
         {
             var handle = new WindowInteropHelper(MainWindow).Handle;
@@ -178,62 +176,5 @@ public partial class App : Application
         }
 
         return IntPtr.Zero;
-    }
-
-    private static bool _isRunspaceCreated;
-
-    private static Runspace CreateRunspace()
-    {
-        var initialSessionState = InitialSessionState.CreateDefault2();
-        initialSessionState.ExecutionPolicy = Microsoft.PowerShell.ExecutionPolicy.RemoteSigned;
-
-        #region Setting Modules (PSModulePath and Import)
-        List<string> psModulePaths = [];
-
-        var myDocumentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        if (!string.IsNullOrEmpty(myDocumentsDir))
-        {
-            var modulePath = Path.Join(myDocumentsDir, "PSLauncher", "Modules");
-            if (Directory.Exists(modulePath))
-            {
-                psModulePaths.Add(modulePath);
-                var startupModule = Path.Join(modulePath, "PSLauncher.psm1");
-                if (File.Exists(startupModule))
-                {
-                    initialSessionState.ImportPSModule(startupModule);
-                }
-            }
-            psModulePaths.Add(Path.Join(myDocumentsDir, "PowerShell", "Modules"));
-        }
-        psModulePaths.Add(Path.Join(PwshInstallPath, "Modules"));
-
-        initialSessionState.EnvironmentVariables.Add(
-            new SessionStateVariableEntry("PSModulePath",
-                                          string.Join(Path.PathSeparator, psModulePaths),
-                                          "PSModulePath for PSLauncher")
-        );
-        #endregion
-
-        var runSpace = RunspaceFactory.CreateRunspace(initialSessionState);
-        runSpace.Open();
-
-        // Set home as initial directory 
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        runSpace.SessionStateProxy.Path.SetLocation(home);
-
-        return runSpace;
-    }
-
-    public static Runspace Runspace
-    {
-        get
-        {
-            if (field is not null)
-                return field;
-
-            field = CreateRunspace();
-            _isRunspaceCreated = true;
-            return field;
-        }
     }
 }
