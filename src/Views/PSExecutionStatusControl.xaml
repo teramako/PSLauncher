@@ -12,6 +12,7 @@
         <Style x:Key="StreamStatusBarItemStyle" TargetType="StatusBarItem">
             <Setter Property="Visibility" Value="Visible"/>
             <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Margin" Value="3,0,3,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
