@@ -9,12 +9,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="60" d:DesignWidth="800">
     <UserControl.Resources>
-        <Style x:Key="PopupBroderStyle" TargetType="Border">
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-        </Style>
         <Style x:Key="StreamStatusBarItemStyle" TargetType="StatusBarItem">
             <Setter Property="Visibility" Value="Visible"/>
             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -33,16 +27,10 @@
                                 </AccessText>
                             </ToggleButton>
                             <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="10"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Path Grid.Row="0" Data="M20,10 L30,0 L40,10 Z" Fill="{TemplateBinding Background}"/>
-                                    <Border Grid.Row="1" Background="{TemplateBinding Background}" Style="{StaticResource PopupBroderStyle}">
-                                        <local:ObjectGridDataView DataContext="{Binding}" MaxWidth="800"/>
-                                    </Border>
-                                </Grid>
+                                <ContentControl Template="{StaticResource BottomBalloonTemplate}"
+                                                Background="{TemplateBinding Background}">
+                                    <local:ObjectGridDataView DataContext="{Binding}" MaxWidth="800"/>
+                                </ContentControl>
                             </Popup>
                         </Grid>
                     </ControlTemplate>

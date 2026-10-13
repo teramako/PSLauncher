@@ -51,4 +51,20 @@
         <Setter Property="Padding" Value="5,0,5,0"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+
+    <!-- Balloon Popup Template -->
+    <Style x:Key="BalloonPopupBroderStyle" TargetType="Border">
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <ControlTemplate x:Key="BottomBalloonTemplate" TargetType="ContentControl">
+        <Grid RowDefinitions="10, Auto">
+            <Path Grid.Row="0" Data="M20,10 L30,0 L40,10 Z" Fill="{TemplateBinding Background}"/>
+            <Border Grid.Row="1" Background="{TemplateBinding Background}" Style="{StaticResource BalloonPopupBroderStyle}">
+                <ContentPresenter/>
+            </Border>
+        </Grid>
+    </ControlTemplate>
 </ResourceDictionary>
