@@ -55,7 +55,7 @@ public partial class MainWindow : Window
 
     private void StopExcution(object sender, RoutedEventArgs e)
     {
-        if (ElapsedTimeControl.IsRunning
+        if (ExecutionStatus.IsRunning
             && psExectionStopSource is { IsCancellationRequested: false })
         {
             psExectionStopSource.Cancel();
@@ -64,7 +64,7 @@ public partial class MainWindow : Window
 
     private void CanStopExecution(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = ElapsedTimeControl.IsRunning;
+        e.CanExecute = ExecutionStatus.IsRunning;
     }
 
     public const string CommandPrefix = @"Start-Process";
@@ -98,12 +98,12 @@ public partial class MainWindow : Window
                 PSDataCollection<PSObject> psResults;
                 try
                 {
-                    ElapsedTimeControl.Start();
+                    ExecutionStatus.Start();
                     psResults = await runner.InvokeAsync(script, cancellationToken: psExectionStopSource.Token);
                 }
                 finally
                 {
-                    ElapsedTimeControl.Stop();
+                    ExecutionStatus.Stop();
                 }
 
                 await ShowResult(psResults);
@@ -113,7 +113,7 @@ public partial class MainWindow : Window
                 // when canceled by user operation.
                 if (psExectionStopSource.IsCancellationRequested)
                 {
-                    ElapsedTimeControl.TooltipText = stoppedException.Message;
+                    ExecutionStatus.TooltipText = stoppedException.Message;
                 }
                 else
                 {
@@ -122,7 +122,7 @@ public partial class MainWindow : Window
             }
             catch (ParseException parseException)
             {
-                ElapsedTimeControl.TooltipText = parseException.Message;
+                ExecutionStatus.TooltipText = parseException.Message;
             }
             catch (Exception ex)
             {

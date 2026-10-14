@@ -67,7 +67,7 @@
                             Focusable="False"
                             ContentTemplateSelector="{StaticResource ResultTemplateSelector}"/>
             <StatusBar Grid.Row="3" Padding="2">
-                <view:ElapsedTimeControl x:Name="ElapsedTimeControl"/>
+                <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
                 <Separator/>
                 <view:PSStreamStatusControl x:Name="StreamStatusPanel"/>
             </StatusBar>

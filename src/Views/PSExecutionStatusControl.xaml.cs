@@ -6,11 +6,11 @@ using System.Windows.Threading;
 
 namespace PSLauncher.Views;
 
-public partial class ElapsedTimeControl : UserControl
+public partial class PSExecutionStatusControl : UserControl
 {
     private const int interval_miliseonds = 200;
 
-    public ElapsedTimeControl()
+    public PSExecutionStatusControl()
     {
         InitializeComponent();
         timer = new(TimeSpan.FromMicroseconds(interval_miliseonds),
@@ -33,7 +33,7 @@ public partial class ElapsedTimeControl : UserControl
     }
 
     public static readonly DependencyProperty ElapsedProperty =
-        DependencyProperty.Register(nameof(Elapsed), typeof(TimeSpan), typeof(ElapsedTimeControl));
+        DependencyProperty.Register(nameof(Elapsed), typeof(TimeSpan), typeof(PSExecutionStatusControl));
 
     public bool IsRunning
     {
@@ -42,7 +42,7 @@ public partial class ElapsedTimeControl : UserControl
     }
 
     public static readonly DependencyProperty IsRunningProperty =
-        DependencyProperty.Register(nameof(IsRunning), typeof(bool), typeof(ElapsedTimeControl));
+        DependencyProperty.Register(nameof(IsRunning), typeof(bool), typeof(PSExecutionStatusControl));
 
     public string? TooltipText
     {
@@ -60,7 +60,7 @@ public partial class ElapsedTimeControl : UserControl
         }
     } = "Stop";
     public static readonly DependencyProperty TooltipTextProperty =
-        DependencyProperty.Register(nameof(TooltipText), typeof(string), typeof(ElapsedTimeControl));
+        DependencyProperty.Register(nameof(TooltipText), typeof(string), typeof(PSExecutionStatusControl));
 
     public void Start()
     {
