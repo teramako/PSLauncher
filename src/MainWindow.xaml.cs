@@ -37,8 +37,6 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        var runspace = App.Runspace;
-        runspace.AvailabilityChanged += Runspace_AvailabilityChanged;
         CommandBox.Focus();
         InitCommandBox();
         InitLocationBox();
@@ -58,31 +56,6 @@ public partial class MainWindow : Window
 
     public const string CommandPrefix = @"Start-Process";
 
-    private PowerShell? _currentPowerShell;
-    public bool IsRunspaceRunning { get; private set; }
-
-    private void Runspace_AvailabilityChanged(object? sender, RunspaceAvailabilityEventArgs e)
-    {
-        UpdateRunspaceAvailablity(e.RunspaceAvailability);
-    }
-    private void UpdateRunspaceAvailablity(RunspaceAvailability availability)
-    {
-        StopRunspaceButton.Dispatcher.InvokeAsync(() =>
-        {
-            StopRunspaceButton.IsEnabled = IsRunspaceRunning = availability switch
-            {
-                RunspaceAvailability.None or RunspaceAvailability.Available => false,
-                _ => true,
-            };
-        }, DispatcherPriority.Background);
-    }
-    private void StopRunspace(object sender, RoutedEventArgs e)
-    {
-        if (IsRunspaceRunning)
-        {
-            _currentPowerShell?.Stop();
-        }
-    }
     private CancellationTokenSource? psExectionStopSource;
 
     private async Task ExecuteScript(string script)
