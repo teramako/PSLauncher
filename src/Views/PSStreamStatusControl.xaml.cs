@@ -1,14 +1,12 @@
-using System.Management.Automation;
 using System.Windows.Controls;
-using System.Windows.Threading;
 using PSLauncher.Models;
 using PSLauncher.Shell;
 
 namespace PSLauncher.Views;
 
-public partial class PSExecutionStatusControl : UserControl
+public partial class PSStreamStatusControl : UserControl
 {
-    public PSExecutionStatusControl()
+    public PSStreamStatusControl()
     {
         InitializeComponent();
     }

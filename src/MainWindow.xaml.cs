@@ -3,7 +3,6 @@ using PSLauncher.Shell;
 using PSLauncher.Views;
 using System.ComponentModel;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -89,7 +88,7 @@ public partial class MainWindow : Window
 
         runner.OnOutput += OnOutput;
 
-        ExecutionStatus.ClearStreams();
+        StreamStatusPanel.ClearStreams();
 
         psExectionStopSource = new();
         using (psExectionStopSource)
@@ -138,7 +137,7 @@ public partial class MainWindow : Window
 
         void OnOutput(object? sender, PSOutputEventArgs e)
         {
-            ExecutionStatus.Dispatcher.InvokeAsync(() => ExecutionStatus.AddRecord(e.Record), DispatcherPriority.Background);
+            StreamStatusPanel.Dispatcher.InvokeAsync(() => StreamStatusPanel.AddRecord(e.Record), DispatcherPriority.Background);
         }
     }
 

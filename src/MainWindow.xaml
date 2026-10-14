@@ -69,7 +69,7 @@
             <StatusBar Grid.Row="3" Padding="2">
                 <view:ElapsedTimeControl x:Name="ElapsedTimeControl"/>
                 <Separator/>
-                <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
+                <view:PSStreamStatusControl x:Name="StreamStatusPanel"/>
             </StatusBar>
         </Grid>
     </Border>
