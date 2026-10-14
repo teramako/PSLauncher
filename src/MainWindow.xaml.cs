@@ -123,7 +123,7 @@ public partial class MainWindow : Window
                     ElapsedTimeControl.Stop();
                 }
 
-                ShowResult(psResults);
+                await ShowResult(psResults);
             }
             catch (Exception ex)
             {
@@ -142,9 +142,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ShowResult(PSDataCollection<PSObject> psDataCollection)
+    private async Task ShowResult(PSDataCollection<PSObject> psDataCollection, CancellationToken cancellationToken = default)
     {
-        var results = ResultList.Build(psDataCollection);
+        var results = await ResultList.BuildAsync(psDataCollection, cancellationToken);
         ResultContent.Content = results;
     }
     private void ShowResult(object obj)
