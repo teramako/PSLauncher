@@ -149,7 +149,7 @@ public partial class MainWindow : Window
 
     private void UpdateStatus()
     {
-        var cwd = App.Runspace.SessionStateProxy.Path.CurrentLocation.Path;
+        var cwd = RunspaceManager.MainRunspace.SessionStateProxy.Path.CurrentLocation.Path;
         PushLocation(cwd);
     }
 
