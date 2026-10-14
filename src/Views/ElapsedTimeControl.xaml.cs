@@ -35,10 +35,20 @@ public partial class ElapsedTimeControl : UserControl
     public static readonly DependencyProperty ElapsedProperty =
         DependencyProperty.Register(nameof(Elapsed), typeof(TimeSpan), typeof(ElapsedTimeControl));
 
+    public bool IsRunning
+    {
+        get => (bool)GetValue(IsRunningProperty);
+        set => SetValue(IsRunningProperty, value);
+    }
+
+    public static readonly DependencyProperty IsRunningProperty =
+        DependencyProperty.Register(nameof(IsRunning), typeof(bool), typeof(ElapsedTimeControl));
+
     public void Start()
     {
         stopwatch.Restart();
         timer.Start();
+        IsRunning = true;
     }
 
     public void Stop()
@@ -46,5 +56,6 @@ public partial class ElapsedTimeControl : UserControl
         timer.Stop();
         stopwatch.Stop();
         Elapsed = stopwatch.Elapsed;
+        IsRunning = false;
     }
 }

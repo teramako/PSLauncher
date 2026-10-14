@@ -1,8 +1,11 @@
+using PSLauncher.Shell;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Management.Automation;
+using System.Runtime.CompilerServices;
 using System.Security;
 
 namespace PSLauncher.Models;
@@ -166,8 +169,9 @@ public class ResultList : INotifyPropertyChanged
     /// Build <seealso cref="ResultList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
     /// </summary>
     /// <param name="psObjects"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static ResultList? Build(PSDataCollection<PSObject> psObjects)
+    public static async Task<ResultList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
     {
         int itemCount = psObjects.Count;
         if (itemCount == 0)
@@ -182,7 +186,7 @@ public class ResultList : INotifyPropertyChanged
         List<object?> objects = [];
         bool isString = false;
         bool isFileSystemInfo = false;
-        foreach (var obj in Utils.GetBaseObjects(psObjects))
+        await foreach(var obj in NormalizePSObjects(psObjects, cancellationToken))
         {
             objects.Add(obj);
             isString = obj is string;
@@ -327,5 +331,79 @@ public class ResultList : INotifyPropertyChanged
                 DisplayData = Utils.ObjectToString(obj)
             },
         };
+    }
+
+    private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,
+                                                                      [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        PSDataCollection<PSObject> formatedObjects = [];
+        foreach (var pso in pSObjects)
+        {
+            if (pso is null)
+            {
+                yield return null;
+                continue;
+            }
+            var obj = Utils.GetBaseObject(pso);
+            var t = obj.GetType();
+            if (t.Namespace == "Microsoft.PowerShell.Commands.Internal.Format")
+            {
+                switch (t.Name)
+                {
+                    case "FormatStartData":
+                        formatedObjects.Clear();
+                        formatedObjects.Add(pso);
+                        continue;
+                    case "GroupStartData":
+                    case "FormatEntryData":
+                    case "GroupEndData":
+                        formatedObjects.Add(pso);
+                        continue;
+                    case "FormatEndData":
+                        formatedObjects.Add(pso);
+                        try
+                        {
+                            foreach (var line in await ToStringFormaattedObjects(formatedObjects, cancellationToken))
+                            {
+                                yield return line;
+                            }
+                        }
+                        finally
+                        {
+                            formatedObjects.Clear();
+                        }
+
+                        continue;
+                }
+            }
+
+            if (formatedObjects.Count > 0)
+            {
+                foreach (var line in await ToStringFormaattedObjects(formatedObjects, cancellationToken))
+                {
+                    yield return line;
+                }
+            }
+            yield return obj;
+        }
+
+    }
+
+    private static async Task<PSDataCollection<string>> ToStringFormaattedObjects(PSDataCollection<PSObject> formatedData,
+                                                                                  CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var cmd = new PSCommand();
+            cmd.AddCommand("Out-String")
+               .AddParameter("Stream")
+               .AddParameter("InputObject", formatedData);
+            return await PowerShellRunner.Sub.SimpleInvokeAsync<string>(cmd, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Debug.Print("ToStringFormaattedObjects: {0}: {1}", ex.GetType().Name, ex.Message);
+        }
+        return [];
     }
 }

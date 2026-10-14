@@ -1,3 +1,4 @@
+using PSLauncher.Shell;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Management.Automation.Runspaces;
@@ -11,7 +12,7 @@ public partial class MainWindow
 {
     private void InitLocationBox()
     {
-        LocationCollection.Add(App.Runspace.SessionStateProxy.Path.CurrentLocation.Path);
+        LocationCollection.Add(RunspaceManager.MainRunspace.SessionStateProxy.Path.CurrentLocation.Path);
         LocationBox.ItemsSource = LocationCollection;
         LocationBox.SelectedIndex = 0;
     }
@@ -84,7 +85,7 @@ public partial class MainWindow
             }
 
             PushLocation(fullPath);
-            App.Runspace.SessionStateProxy.Path.SetLocation(fullPath);
+            RunspaceManager.MainRunspace.SessionStateProxy.Path.SetLocation(fullPath);
         }
         finally
         {
