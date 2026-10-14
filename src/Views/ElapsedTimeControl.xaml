@@ -47,10 +47,20 @@
         </Style>
     </UserControl.Resources>
     <StatusBarItem x:Name="ElapsedTimeStatus">
-        <Button x:Name="StopExecutionButton" Style="{StaticResource StopExecutionButtonStyle}"
-                IsEnabled="{Binding IsRunning, ElementName=root}"
-                Content="{Binding Elapsed, ElementName=root}"
-                ContentStringFormat="{}{0:mm\:ss\.fff}"
-                Command="main:Commands.StopExecution"/>
+        <Grid>
+            <Button x:Name="StopExecutionButton" Style="{StaticResource StopExecutionButtonStyle}"
+                    IsEnabled="{Binding IsRunning, ElementName=root}"
+                    Content="{Binding Elapsed, ElementName=root}"
+                    ContentStringFormat="{}{0:mm\:ss\.fff}"
+                    ToolTip="{Binding TooltipText, ElementName=root}"
+                    ToolTipService.ShowOnDisabled="True"
+                    Command="main:Commands.StopExecution">
+            </Button>
+            <Popup x:Name="MessageTooltip" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                <ContentControl Template="{StaticResource BottomBalloonTemplate}"
+                                Content="{Binding TooltipText, ElementName=root}"
+                                Background="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
+            </Popup>
+        </Grid>
     </StatusBarItem>
 </UserControl>

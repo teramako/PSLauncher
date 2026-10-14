@@ -109,6 +109,22 @@ public partial class MainWindow : Window
 
                 await ShowResult(psResults);
             }
+            catch (PipelineStoppedException stoppedException)
+            {
+                // when canceled by user operation.
+                if (psExectionStopSource.IsCancellationRequested)
+                {
+                    ElapsedTimeControl.TooltipText = stoppedException.Message;
+                }
+                else
+                {
+                    ShowResult(stoppedException);
+                }
+            }
+            catch (ParseException parseException)
+            {
+                ElapsedTimeControl.TooltipText = parseException.Message;
+            }
             catch (Exception ex)
             {
                 ShowResult(ex);

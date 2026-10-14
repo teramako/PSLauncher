@@ -44,11 +44,30 @@ public partial class ElapsedTimeControl : UserControl
     public static readonly DependencyProperty IsRunningProperty =
         DependencyProperty.Register(nameof(IsRunning), typeof(bool), typeof(ElapsedTimeControl));
 
+    public string? TooltipText
+    {
+        get => field = (string)GetValue(TooltipTextProperty);
+        set
+        {
+            var val = string.IsNullOrEmpty(value) ? "Stop" : value;
+            SetValue(TooltipTextProperty, val);
+            field = val;
+            if (field != "Stop")
+            {
+                MessageTooltip.IsOpen = true;
+            }
+
+        }
+    } = "Stop";
+    public static readonly DependencyProperty TooltipTextProperty =
+        DependencyProperty.Register(nameof(TooltipText), typeof(string), typeof(ElapsedTimeControl));
+
     public void Start()
     {
         stopwatch.Restart();
         timer.Start();
         IsRunning = true;
+        TooltipText = null;
     }
 
     public void Stop()
