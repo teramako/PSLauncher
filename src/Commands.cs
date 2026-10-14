@@ -5,4 +5,5 @@ namespace PSLauncher;
 public static class Commands
 {
     public static readonly RoutedUICommand FocusToResultContent = new("Focus Result", "FocusResult", typeof(Commands));
+    public static readonly RoutedUICommand StopExecution = new("Stop Execution", "StopExecution", typeof(Commands));
 }

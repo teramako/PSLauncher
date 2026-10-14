@@ -54,13 +54,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private void StopExcution(object sender, RoutedEventArgs e)
+    {
+        if (ElapsedTimeControl.IsRunning
+            && psExectionStopSource is { IsCancellationRequested: false })
+        {
+            psExectionStopSource.Cancel();
+        }
+    }
+
+    private void CanStopExecution(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = ElapsedTimeControl.IsRunning;
+    }
+
     public const string CommandPrefix = @"Start-Process";
 
     private CancellationTokenSource? psExectionStopSource;
 
     private async Task ExecuteScript(string script)
     {
-
         var runner = PowerShellRunner.Main;
         if (runner.IsRunning)
             return;
@@ -87,12 +100,10 @@ public partial class MainWindow : Window
                 try
                 {
                     ElapsedTimeControl.Start();
-                    StopRunspaceButton.IsEnabled = true;
                     psResults = await runner.InvokeAsync(script, cancellationToken: psExectionStopSource.Token);
                 }
                 finally
                 {
-                    StopRunspaceButton.IsEnabled = false;
                     ElapsedTimeControl.Stop();
                 }
 

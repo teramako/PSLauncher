@@ -4,10 +4,53 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PSLauncher.Views"
+             xmlns:main="clr-namespace:PSLauncher"
              mc:Ignorable="d" 
              d:DesignHeight="32" d:DesignWidth="100"
-             x:Name="root">
-    <StatusBarItem x:Name="ElapsedTimeStatus"
-                   Content="{Binding Elapsed, ElementName=root}"
-                   ContentStringFormat="mm\:ss\.ff"/>
+             x:Name="root" Loaded="root_Loaded">
+    <UserControl.Resources>
+        <!-- Stop Execution Button Style -->
+        <Style x:Key="StopExecutionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+            <Setter Property="IsEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="16" Height="16">
+                                <Path Name="rect" Fill="Red" Data="M 2,2 L 14,2 L 14,14 L 2,14 Z"/>
+                            </Grid>
+                            <ContentPresenter x:Name="ContentPresenter" RecognizesAccessKey="True"
+                                              Margin="5,0,0,0"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ContentPresenter" Property="TextElement.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="rect" Property="Fill" Value="LimeGreen"/>
+                                <Setter TargetName="ContentPresenter" Property="TextElement.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ContentPresenter" Property="TextElement.Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <StatusBarItem x:Name="ElapsedTimeStatus">
+        <Button x:Name="StopExecutionButton" Style="{StaticResource StopExecutionButtonStyle}"
+                IsEnabled="{Binding IsRunning, ElementName=root}"
+                Content="{Binding Elapsed, ElementName=root}"
+                ContentStringFormat="{}{0:mm\:ss\.fff}"
+                Command="main:Commands.StopExecution"/>
+    </StatusBarItem>
 </UserControl>

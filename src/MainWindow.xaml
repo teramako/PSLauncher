@@ -34,6 +34,7 @@
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Close" Executed="ExitApplication"/>
         <CommandBinding Command="local:Commands.FocusToResultContent" Executed="FocusToResultContent"/>
+        <CommandBinding Command="local:Commands.StopExecution" Executed="StopExcution" CanExecute="CanStopExecution"/>
     </Window.CommandBindings>
 
     <Border Style="{StaticResource WindowBorderStyle}">
@@ -66,9 +67,6 @@
                             Focusable="False"
                             ContentTemplateSelector="{StaticResource ResultTemplateSelector}"/>
             <StatusBar Grid.Row="3" Padding="2">
-                <StatusBarItem>
-                    <Button x:Name="StopRunspaceButton" Style="{StaticResource StopRunspaceButtonStyle}" Click="StopRunspace"/>
-                </StatusBarItem>
                 <view:ElapsedTimeControl x:Name="ElapsedTimeControl"/>
                 <Separator/>
                 <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
