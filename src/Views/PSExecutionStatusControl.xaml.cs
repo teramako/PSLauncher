@@ -2,6 +2,7 @@ using System.Management.Automation;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using PSLauncher.Models;
+using PSLauncher.Shell;
 
 namespace PSLauncher.Views;
 
@@ -17,11 +18,28 @@ public partial class PSExecutionStatusControl : UserControl
     public ResultList InformationList { get; } = new() { Description = "Information" };
     public ResultList DebugList { get; } = new() { Description = "Debug" };
 
-    public void AddRecord<T>(ResultList target, object? sender, DataAddedEventArgs e) where T : class
+    public void AddRecord(PSDataRecord record)
     {
-        var record = (sender as PSDataCollection<T>)?[e.Index];
-        if (record is null) return;
-        Dispatcher.InvokeAsync(() => target.Append(record), DispatcherPriority.Background);
+        switch (record.StreamType)
+        {
+            case StreamType.Error:
+                ErrorList.Append(record.Value);
+                return;
+            case StreamType.Warning:
+                WarningList.Append(record.Value);
+                return;
+            case StreamType.Verbose:
+                VerboseList.Append(record.Value);
+                return;
+            case StreamType.Debug:
+                VerboseList.Append(record.Value);
+                return;
+            case StreamType.Information:
+                VerboseList.Append(record.Value);
+                return;
+            default:
+                return;
+        }
     }
 
     public void ClearStreams()

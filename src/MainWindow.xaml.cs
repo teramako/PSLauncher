@@ -1,4 +1,5 @@
 using PSLauncher.Models;
+using PSLauncher.Shell;
 using PSLauncher.Views;
 using System.ComponentModel;
 using System.Management.Automation;
@@ -82,10 +83,13 @@ public partial class MainWindow : Window
             _currentPowerShell?.Stop();
         }
     }
+    private CancellationTokenSource? psExectionStopSource;
 
     private async Task ExecuteScript(string script)
     {
-        if (IsRunspaceRunning)
+
+        var runner = PowerShellRunner.Main;
+        if (runner.IsRunning)
             return;
 
         if (string.IsNullOrWhiteSpace(script))
@@ -96,43 +100,45 @@ public partial class MainWindow : Window
         {
             script = $@"{CommandPrefix} {script[1..]}";
         }
-        var es = ExecutionStatus;
-        PowerShell ps;
-        if (_currentPowerShell is null)
+
+        runner.OnOutput += OnOutput;
+
+        ExecutionStatus.ClearStreams();
+
+        psExectionStopSource = new();
+        using (psExectionStopSource)
         {
-            ps = _currentPowerShell = PowerShell.Create(App.Runspace);
-            ps.Streams.Error.DataAdded += (s, e) => es.AddRecord<ErrorRecord>(es.ErrorList, s, e);
-            ps.Streams.Warning.DataAdded += (s, e) => es.AddRecord<WarningRecord>(es.WarningList, s, e);
-            ps.Streams.Verbose.DataAdded += (s, e) => es.AddRecord<VerboseRecord>(es.VerboseList, s, e);
-            ps.Streams.Information.DataAdded += (s, e) => es.AddRecord<InformationRecord>(es.InformationList, s, e);
-            ps.Streams.Debug.DataAdded += (s, e) => es.AddRecord<DebugRecord>(es.DebugList, s, e);
+            try
+            {
+                PSDataCollection<PSObject> psResults;
+                try
+                {
+                    ElapsedTimeControl.Start();
+                    StopRunspaceButton.IsEnabled = true;
+                    psResults = await runner.InvokeAsync(script, cancellationToken: psExectionStopSource.Token);
+                }
+                finally
+                {
+                    StopRunspaceButton.IsEnabled = false;
+                    ElapsedTimeControl.Stop();
+                }
+
+                ShowResult(psResults);
+            }
+            catch (Exception ex)
+            {
+                ShowResult(ex);
+            }
+            finally
+            {
+                runner.OnOutput -= OnOutput;
+                UpdateStatus();
+            }
         }
-        else
+
+        void OnOutput(object? sender, PSOutputEventArgs e)
         {
-            es.ClearStreams();
-            ps = _currentPowerShell;
-            ps.Commands.Clear();
-            ps.Streams.ClearStreams();
-        }
-        try
-        {
-            ps.AddScript(script);
-            ElapsedTimeControl.Start();
-            var results = await ps.InvokeAsync();
-            ElapsedTimeControl.Stop();
-            ShowResult(results);
-        }
-        catch (PipelineStoppedException)
-        {
-            // ignore
-        }
-        catch (Exception ex)
-        {
-            ShowResult(ex);
-        }
-        finally
-        {
-            UpdateStatus();
+            ExecutionStatus.Dispatcher.InvokeAsync(() => ExecutionStatus.AddRecord(e.Record), DispatcherPriority.Background);
         }
     }
 
