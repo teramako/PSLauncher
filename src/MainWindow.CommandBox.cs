@@ -82,11 +82,11 @@ public partial class MainWindow
                 break;
             case Key.Tab:
                 e.Handled = true;
-                StartCompletion(autoAcceptSingleMatch: true);
+                StartCompletionAsync(autoAcceptSingleMatch: true);
                 break;
             case Key.Space when Keyboard.Modifiers is ModifierKeys.Control:
                 e.Handled = true;
-                StartCompletion(autoAcceptSingleMatch: false);
+                StartCompletionAsync(autoAcceptSingleMatch: false);
                 break;
         }
     }
