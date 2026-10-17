@@ -30,10 +30,10 @@ public partial class PSStreamStatusControl : UserControl
                 VerboseList.Append(record.Value);
                 return;
             case StreamType.Debug:
-                VerboseList.Append(record.Value);
+                DebugList.Append(record.Value);
                 return;
             case StreamType.Information:
-                VerboseList.Append(record.Value);
+                InformationList.Append(record.Value);
                 return;
             default:
                 return;
