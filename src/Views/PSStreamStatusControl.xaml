@@ -17,23 +17,59 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <Grid d:DataContext="{d:DesignInstance Type=model:ResultList}">
-                            <ToggleButton Name="PopupButton">
-                                <AccessText>
-                                    <AccessText.Text>
-                                        <MultiBinding StringFormat="{}_{0}: {1:N0}">
-                                            <Binding Path="Description" Mode="OneTime"/>
-                                            <Binding Path="Count" Mode="OneWay"/>
-                                        </MultiBinding>
-                                    </AccessText.Text>
-                                </AccessText>
+                            <ToggleButton Name="PopupButton" ToolTip="{Binding Description}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Name="IconGrid" Width="16" Height="16" Margin="0,0,4,0" Visibility="Collapsed">
+                                        <Path Name="IconPath" Stretch="Uniform"/>
+                                        <AccessText Name="AccessKey" Foreground="Transparent"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Count, StringFormat=N0}"/>
+                                </StackPanel>
                             </ToggleButton>
                             <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="True" AllowsTransparency="True">
-                                <ContentControl Template="{StaticResource BottomBalloonTemplate}"
-                                                Background="{TemplateBinding Background}">
+                                <ContentControl Name="PopupContent" Template="{StaticResource BottomBalloonTemplate}"
+                                                Background="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}">
                                     <local:ObjectGridDataView DataContext="{Binding}" MaxWidth="800"/>
                                 </ContentControl>
                             </Popup>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Tag" Value="Error">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_E"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource ErrorFilledPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCriticalBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Warning">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_W"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource WarningFilledPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Verbose">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_V"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource WarningRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Debug">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_D"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource DebugRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorAttentionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Info">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_I"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource InfoRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -43,22 +79,33 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="ErrorStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Error"/>
+        </Style>
+        <Style x:Key="WarningStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Warning"/>
+        </Style>
+        <Style x:Key="VerboseStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Verbose"/>
+        </Style>
+        <Style x:Key="DebugStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Debug"/>
+        </Style>
+        <Style x:Key="InfoStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Info"/>
+        </Style>
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
         <StatusBarItem Name="ErrorStatus" DataContext="{Binding ErrorList, ElementName=streams}"
-                       Style="{StaticResource StreamStatusBarItemStyle}"
-                       Background="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
+                       Style="{StaticResource ErrorStatusBarItemStyle}"/>
         <StatusBarItem Name="WarningStatus" DataContext="{Binding WarningList, ElementName=streams}"
-                       Style="{StaticResource StreamStatusBarItemStyle}"
-                       Background="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+                       Style="{StaticResource WarningStatusBarItemStyle}"/>
         <StatusBarItem Name="VerboseStatus" DataContext="{Binding VerboseList, ElementName=streams}"
-                       Style="{StaticResource StreamStatusBarItemStyle}"
+                       Style="{StaticResource VerboseStatusBarItemStyle}"/>
+        <StatusBarItem Name="DebugStatus" DataContext="{Binding DebugList, ElementName=streams}"
+                       Style="{StaticResource DebugStatusBarItemStyle}"
                        Background="{DynamicResource SystemFillColorSolidAttentionBackgroundBrush}"/>
         <StatusBarItem Name="InformationStatus" DataContext="{Binding InformationList, ElementName=streams}"
-                       Style="{StaticResource StreamStatusBarItemStyle}"
-                       Background="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}"/>
-        <StatusBarItem Name="DebugStatus" DataContext="{Binding DebugList, ElementName=streams}"
-                       Style="{StaticResource StreamStatusBarItemStyle}"
-                       Background="{DynamicResource SystemFillColorSolidAttentionBackgroundBrush}"/>
+                       Style="{StaticResource InfoStatusBarItemStyle}"/>
     </StackPanel>
 </UserControl>
