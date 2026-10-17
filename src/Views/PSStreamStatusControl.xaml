@@ -27,7 +27,7 @@
                                     </AccessText.Text>
                                 </AccessText>
                             </ToggleButton>
-                            <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                            <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="True" AllowsTransparency="True">
                                 <ContentControl Template="{StaticResource BottomBalloonTemplate}"
                                                 Background="{TemplateBinding Background}">
                                     <local:ObjectGridDataView DataContext="{Binding}" MaxWidth="800"/>
