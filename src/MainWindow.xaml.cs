@@ -144,12 +144,12 @@ public partial class MainWindow : Window
     private async Task ShowResult(PSDataCollection<PSObject> psDataCollection, CancellationToken cancellationToken = default)
     {
         var results = await ResultList.BuildAsync(psDataCollection, cancellationToken);
-        ResultContent.Content = results;
+        ResultContent.DataContext = results;
     }
     private void ShowResult(object obj)
     {
         var results = ResultList.Build(obj);
-        ResultContent.Content = results;
+        ResultContent.DataContext = results;
     }
 
     private void UpdateStatus()

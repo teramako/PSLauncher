@@ -29,7 +29,7 @@
                             <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="True" AllowsTransparency="True">
                                 <ContentControl Name="PopupContent" Template="{StaticResource BottomBalloonTemplate}"
                                                 Background="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}">
-                                    <local:ObjectGridDataView DataContext="{Binding}" MaxWidth="800"/>
+                                    <local:ExpandableDataGridControl DataContext="{Binding}" MaxWidth="800" MaxHeight="300"/>
                                 </ContentControl>
                             </Popup>
                         </Grid>

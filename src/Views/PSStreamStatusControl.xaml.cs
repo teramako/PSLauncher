@@ -10,11 +10,11 @@ public partial class PSStreamStatusControl : UserControl
     {
         InitializeComponent();
     }
-    public ResultList ErrorList { get; } = new() { Description = "Error" };
-    public ResultList WarningList { get; } = new() { Description = "Warning" };
-    public ResultList VerboseList { get; } = new() { Description = "Verbose" };
-    public ResultList InformationList { get; } = new() { Description = "Information" };
-    public ResultList DebugList { get; } = new() { Description = "Debug" };
+    public ResultList ErrorList { get; } = new() { Description = "Error", Kind = ResultDataKind.Complex };
+    public ResultList WarningList { get; } = new() { Description = "Warning", Kind = ResultDataKind.Complex };
+    public ResultList VerboseList { get; } = new() { Description = "Verbose", Kind = ResultDataKind.Complex };
+    public ResultList InformationList { get; } = new() { Description = "Information", Kind = ResultDataKind.Complex };
+    public ResultList DebugList { get; } = new() { Description = "Debug", Kind = ResultDataKind.Complex };
 
     public void AddRecord(PSDataRecord record)
     {

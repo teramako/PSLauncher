@@ -63,9 +63,7 @@
                           PreviewMouseLeftButtonUp="LocationBox_PreviewMouseLeftButtonUp"/>
             </Grid>
 
-            <ContentControl x:Name="ResultContent" Grid.Row="2"
-                            Focusable="False"
-                            ContentTemplateSelector="{StaticResource ResultTemplateSelector}"/>
+            <view:ResultViewControl x:Name="ResultContent" Grid.Row="2" Focusable="False"/>
             <StatusBar Grid.Row="3" Padding="2">
                 <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
                 <Separator/>

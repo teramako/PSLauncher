@@ -67,4 +67,41 @@
             </Border>
         </Grid>
     </ControlTemplate>
+
+    <!-- ResultView -->
+    <Style x:Key="ResultStackPanelStyle" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Vertical"/>
+        <Style.Triggers>
+            <Trigger Property="DataContext" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="ResultTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="IsReadOnlyCaretVisible" Value="True"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="MaxHeight" Value="200"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="ResultExpanderStyle" TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Setter Property="IsExpanded" Value="True"/>
+        <Setter Property="Padding" Value="0,3,0,3"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Kind}" Value="Complex">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Kind}" Value="Files">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>
