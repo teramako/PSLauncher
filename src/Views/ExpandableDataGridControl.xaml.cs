@@ -115,6 +115,11 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
                 FocusToResultGrid(dataGrid, parentIndex);
                 e.Handled = true;
                 break;
+            case Key.P when Keyboard.Modifiers is ModifierKeys.Control:
+                var item = data.Items[selectedIndex];
+                Commands.PinItem.Execute(item, dataGrid);
+                e.Handled = true;
+                break;
             default:
                 return;
         }

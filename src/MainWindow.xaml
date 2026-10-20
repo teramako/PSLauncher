@@ -30,6 +30,7 @@
     <Window.InputBindings>
         <KeyBinding Command="ApplicationCommands.Close" Key="F4" Modifiers="Alt"/>
         <KeyBinding Command="local:Commands.FocusToResultContent" Key="R" Modifiers="Alt"/>
+        <KeyBinding Command="local:Commands.UnpinItem" Key="P" Modifiers="Ctrl+Shift"/>
     </Window.InputBindings>
 
     <Window.CommandBindings>
