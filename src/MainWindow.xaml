@@ -74,9 +74,9 @@
                 <view:PSStreamStatusControl x:Name="StreamStatusPanel"/>
                 <StatusBarItem x:Name="PinnedItem" d:DataContext="{d:DesignInstance Type=model:PinnedItem}"
                                Style="{StaticResource PinnedStatusBarItemStyle}"
-                               ToolTip="{Binding ToolTipText}"
-                               ContextMenu="{StaticResource PinnedItemContextMenu}">
-                    <ToggleButton Name="PinnedButton">
+                               ToolTip="{Binding ToolTipText}">
+                    <ToggleButton Name="PinnedButton"
+                                  ContextMenu="{StaticResource PinnedItemContextMenu}">
                         <StackPanel Orientation="Horizontal">
                             <Grid Width="16" Height="16">
                                 <Path Data="{StaticResource PinnedPath}" Stretch="Uniform" Fill="{StaticResource PinnedIconColorBrush}"/>
