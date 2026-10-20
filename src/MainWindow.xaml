@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PSLauncher"
         xmlns:view="clr-namespace:PSLauncher.Views"
+        xmlns:model="clr-namespace:PSLauncher.Models"
         mc:Ignorable="d"
         Title="PSLauncher"
         MaxWidth="800"
@@ -68,6 +69,32 @@
                 <view:PSExecutionStatusControl x:Name="ExecutionStatus"/>
                 <Separator/>
                 <view:PSStreamStatusControl x:Name="StreamStatusPanel"/>
+                <StatusBarItem x:Name="PinnedItem" d:DataContext="{d:DesignInstance Type=model:PinnedItem}"
+                               Style="{StaticResource PinnedStatusBarItemStyle}"
+                               ToolTip="{Binding ToolTipText}">
+                    <ToggleButton Name="PinnedButton">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="16" Height="16">
+                                <Path Data="{StaticResource PinnedPath}" Stretch="Uniform" Fill="{StaticResource PinnedIconColorBrush}"/>
+                                <AccessText Text="_P" Foreground="Transparent"/>
+                            </Grid>
+                            <Image Source="{Binding Icon}" Style="{StaticResource ItemIconStyle}"/>
+                            <TextBlock Text="{Binding Description}" Padding="4,0,0,0"/>
+                            <Popup IsOpen="{Binding IsChecked, ElementName=PinnedButton}" Placement="Bottom" StaysOpen="True" AllowsTransparency="True" MaxWidth="600"
+                                   Opened="PinnedItem_OnPopupOpened">
+                                <ContentControl Name="PopupContent" Template="{StaticResource BottomBalloonTemplate}"
+                                                Background="{StaticResource DefaultBalloonPopupBackgroundColorBrush}">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBox Name="ResultText" Style="{StaticResource ResultTextBoxStyle}"
+                                                 Text="{Binding DisplayData, Mode=OneWay}"
+                                                 IsEnabled="{Binding HasDisplayData}"/>
+                                        <view:ExpandableDataGridControl x:Name="DetailDataGrid" DataContext="{Binding}" MaxHeight="200"/>
+                                    </StackPanel>
+                                </ContentControl>
+                            </Popup>
+                        </StackPanel>
+                    </ToggleButton>
+                </StatusBarItem>
             </StatusBar>
         </Grid>
     </Border>
