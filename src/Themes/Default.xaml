@@ -59,6 +59,8 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
+    <Color x:Key="DefaultPopupBackgroundColor">#383838</Color>
+    <SolidColorBrush x:Key="DefaultBalloonPopupBackgroundColorBrush" Color="{StaticResource DefaultPopupBackgroundColor}"/>
     <ControlTemplate x:Key="BottomBalloonTemplate" TargetType="ContentControl">
         <Grid RowDefinitions="10, Auto">
             <Path Grid.Row="0" Data="M20,10 L30,0 L40,10 Z" Fill="{TemplateBinding Background}"/>

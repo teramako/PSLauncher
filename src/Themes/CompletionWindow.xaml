@@ -2,8 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Color x:Key="PopupBackgroundColor">#2C2C2C</Color>
     <SolidColorBrush x:Key="PopupBackgroundBrush" Color="{DynamicResource PopupBackgroundColor}"/>
+    <SolidColorBrush x:Key="CompletionWindowBackgroundColorBrush" Color="{StaticResource DefaultPopupBackgroundColor}"/>
     <Style x:Key="WindowBorderStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource ApplicationBackgroundBrush}"/>
+        <Setter Property="Background" Value="{StaticResource CompletionWindowBackgroundColorBrush}"/>
         <Setter Property="CornerRadius" Value="{StaticResource PopupCornerRadius}"/>
         <Setter Property="Padding" Value="8"/>
         <Setter Property="BorderThickness" Value="2"/>

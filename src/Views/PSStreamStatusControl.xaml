@@ -60,14 +60,14 @@
                                 <Setter TargetName="IconPath" Property="Data" Value="{StaticResource DebugRegularPath}"/>
                                 <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorAttentionBrush}"/>
                                 <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource DefaultBalloonPopupBackgroundColorBrush}"/>
                             </Trigger>
                             <Trigger Property="Tag" Value="Info">
                                 <Setter TargetName="AccessKey" Property="Text" Value="_I"/>
                                 <Setter TargetName="IconPath" Property="Data" Value="{StaticResource InfoRegularPath}"/>
                                 <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
                                 <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource DefaultBalloonPopupBackgroundColorBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
