@@ -64,4 +64,8 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <ContextMenu x:Key="PinnedItemContextMenu">
+        <MenuItem Command="local:Commands.UnpinItem"/>
+    </ContextMenu>
 </ResourceDictionary>
