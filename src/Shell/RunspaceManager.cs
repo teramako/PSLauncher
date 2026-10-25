@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -115,6 +115,8 @@ internal static class RunspaceManager
             psModulePaths.Add(Path.Join(myDocumentsDir, "PowerShell", "Modules"));
         }
         psModulePaths.Add(Path.Join(App.PwshInstallPath, "Modules"));
+
+        initialSessionState.ImportPSModulesFromPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PSModules"));
 
         initialSessionState.EnvironmentVariables.Add(
             new SessionStateVariableEntry("PSModulePath",
