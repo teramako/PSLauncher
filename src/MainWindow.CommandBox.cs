@@ -1,3 +1,4 @@
+using PSLauncher.Shell;
 using System.Management.Automation.Language;
 using System.Windows;
 using System.Windows.Controls;
@@ -70,9 +71,9 @@ public partial class MainWindow
                 break;
             case Key.C when Keyboard.Modifiers is ModifierKeys.Control:
                 e.Handled = true;
-                if (IsRunspaceRunning)
+                if (PowerShellRunner.Main.IsRunning)
                 {
-                    StopRunspace(sender, e);
+                    StopExcution(sender, e);
                 }
                 else
                 {
@@ -82,11 +83,11 @@ public partial class MainWindow
                 break;
             case Key.Tab:
                 e.Handled = true;
-                StartCompletion(autoAcceptSingleMatch: true);
+                StartCompletionAsync(autoAcceptSingleMatch: true);
                 break;
             case Key.Space when Keyboard.Modifiers is ModifierKeys.Control:
                 e.Handled = true;
-                StartCompletion(autoAcceptSingleMatch: false);
+                StartCompletionAsync(autoAcceptSingleMatch: false);
                 break;
         }
     }

@@ -1,19 +1,64 @@
+using PSLauncher.Shell;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Management.Automation;
+using System.Runtime.CompilerServices;
 using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultList
+public class ResultList : INotifyPropertyChanged
 {
-    public required object? RootObject { get; init; }
+    public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
     public string DisplayData { get; init; } = string.Empty;
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
-    public ResultDataKind Kind { get; init; } = ResultDataKind.Null;
-    public ObservableCollection<IResultData>? Items { get; init; }
+    public ResultDataKind Kind { get; init; }
+    public ObservableCollection<IResultData> Items { get; init; } = [];
+
+    /// <summary>
+    /// Count of root items
+    /// </summary>
+    public int Count
+    {
+        get
+        {
+            if (field < 0)
+            {
+                field = Items.Count(item => item.Level == 0);
+            }
+            return field;
+        }
+        private set
+        {
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Count)));
+        }
+    } = -1;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void Append(IResultData data)
+    {
+        Items.Add(data);
+        Count += 1;
+    }
+
+    public void Append(object? data)
+    {
+        var c = Count;
+        Items.Add(new ResultData($"[{c}]", data));
+        Count = c + 1;
+    }
+
+    public void Clear()
+    {
+        Count = 0;
+        Items.Clear();
+    }
 
     /// <summary>
     /// Expands the row at the specified index and inserts its child rows into the collection.
@@ -124,8 +169,9 @@ public class ResultList
     /// Build <seealso cref="ResultList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
     /// </summary>
     /// <param name="psObjects"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static ResultList? Build(PSDataCollection<PSObject> psObjects)
+    public static async Task<ResultList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
     {
         int itemCount = psObjects.Count;
         if (itemCount == 0)
@@ -140,7 +186,7 @@ public class ResultList
         List<object?> objects = [];
         bool isString = false;
         bool isFileSystemInfo = false;
-        foreach (var obj in Utils.GetBaseObjects(psObjects))
+        await foreach(var obj in NormalizePSObjects(psObjects, cancellationToken))
         {
             objects.Add(obj);
             isString = obj is string;
@@ -194,12 +240,7 @@ public class ResultList
     {
         if (obj is null)
         {
-            return new ResultList
-            {
-                RootObject = null,
-                Kind = ResultDataKind.Null,
-                Description = "(null)"
-            };
+            return null;
         }
         var baseType = Utils.GetTypeName(obj.GetType());
         return obj switch
@@ -290,5 +331,79 @@ public class ResultList
                 DisplayData = Utils.ObjectToString(obj)
             },
         };
+    }
+
+    private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,
+                                                                      [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        PSDataCollection<PSObject> formatedObjects = [];
+        foreach (var pso in pSObjects)
+        {
+            if (pso is null)
+            {
+                yield return null;
+                continue;
+            }
+            var obj = Utils.GetBaseObject(pso);
+            var t = obj.GetType();
+            if (t.Namespace == "Microsoft.PowerShell.Commands.Internal.Format")
+            {
+                switch (t.Name)
+                {
+                    case "FormatStartData":
+                        formatedObjects.Clear();
+                        formatedObjects.Add(pso);
+                        continue;
+                    case "GroupStartData":
+                    case "FormatEntryData":
+                    case "GroupEndData":
+                        formatedObjects.Add(pso);
+                        continue;
+                    case "FormatEndData":
+                        formatedObjects.Add(pso);
+                        try
+                        {
+                            foreach (var line in await ToStringFormaattedObjects(formatedObjects, cancellationToken))
+                            {
+                                yield return line;
+                            }
+                        }
+                        finally
+                        {
+                            formatedObjects.Clear();
+                        }
+
+                        continue;
+                }
+            }
+
+            if (formatedObjects.Count > 0)
+            {
+                foreach (var line in await ToStringFormaattedObjects(formatedObjects, cancellationToken))
+                {
+                    yield return line;
+                }
+            }
+            yield return obj;
+        }
+
+    }
+
+    private static async Task<PSDataCollection<string>> ToStringFormaattedObjects(PSDataCollection<PSObject> formatedData,
+                                                                                  CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var cmd = new PSCommand();
+            cmd.AddCommand("Out-String")
+               .AddParameter("Stream")
+               .AddParameter("InputObject", formatedData);
+            return await PowerShellRunner.Sub.SimpleInvokeAsync<string>(cmd, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Debug.Print("ToStringFormaattedObjects: {0}: {1}", ex.GetType().Name, ex.Message);
+        }
+        return [];
     }
 }

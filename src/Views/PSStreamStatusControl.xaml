@@ -1,0 +1,111 @@
+<UserControl x:Class="PSLauncher.Views.PSStreamStatusControl"
+             Name="streams"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PSLauncher.Views"
+             xmlns:model="clr-namespace:PSLauncher.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="60" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="StreamStatusBarItemStyle" TargetType="StatusBarItem">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Margin" Value="3,0,3,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Grid d:DataContext="{d:DesignInstance Type=model:ResultList}">
+                            <ToggleButton Name="PopupButton" ToolTip="{Binding Description}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Name="IconGrid" Width="16" Height="16" Margin="0,0,4,0" Visibility="Collapsed">
+                                        <Path Name="IconPath" Stretch="Uniform"/>
+                                        <AccessText Name="AccessKey" Foreground="Transparent"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Count, StringFormat=N0}"/>
+                                </StackPanel>
+                            </ToggleButton>
+                            <Popup IsOpen="{Binding IsChecked, ElementName=PopupButton}" Placement="Bottom" StaysOpen="True" AllowsTransparency="True">
+                                <ContentControl Name="PopupContent" Template="{StaticResource BottomBalloonTemplate}"
+                                                Background="{DynamicResource SystemFillColorSolidNeutralBackgroundBrush}">
+                                    <local:ExpandableDataGridControl DataContext="{Binding}" MaxWidth="800" MaxHeight="300"/>
+                                </ContentControl>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Tag" Value="Error">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_E"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource ErrorFilledPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCriticalBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Warning">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_W"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource WarningFilledPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Verbose">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_V"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource WarningRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Debug">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_D"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource DebugRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorAttentionBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource DefaultBalloonPopupBackgroundColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Info">
+                                <Setter TargetName="AccessKey" Property="Text" Value="_I"/>
+                                <Setter TargetName="IconPath" Property="Data" Value="{StaticResource InfoRegularPath}"/>
+                                <Setter TargetName="IconPath" Property="Fill" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                <Setter TargetName="IconGrid" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PopupContent" Property="Background" Value="{DynamicResource DefaultBalloonPopupBackgroundColorBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Count, FallbackValue=0}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ErrorStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Error"/>
+        </Style>
+        <Style x:Key="WarningStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Warning"/>
+        </Style>
+        <Style x:Key="VerboseStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Verbose"/>
+        </Style>
+        <Style x:Key="DebugStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Debug"/>
+        </Style>
+        <Style x:Key="InfoStatusBarItemStyle" TargetType="StatusBarItem" BasedOn="{StaticResource StreamStatusBarItemStyle}">
+            <Setter Property="Tag" Value="Info"/>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal">
+        <StatusBarItem Name="ErrorStatus" DataContext="{Binding ErrorList, ElementName=streams}"
+                       Style="{StaticResource ErrorStatusBarItemStyle}"/>
+        <StatusBarItem Name="WarningStatus" DataContext="{Binding WarningList, ElementName=streams}"
+                       Style="{StaticResource WarningStatusBarItemStyle}"/>
+        <StatusBarItem Name="VerboseStatus" DataContext="{Binding VerboseList, ElementName=streams}"
+                       Style="{StaticResource VerboseStatusBarItemStyle}"/>
+        <StatusBarItem Name="DebugStatus" DataContext="{Binding DebugList, ElementName=streams}"
+                       Style="{StaticResource DebugStatusBarItemStyle}"
+                       Background="{DynamicResource SystemFillColorSolidAttentionBackgroundBrush}"/>
+        <StatusBarItem Name="InformationStatus" DataContext="{Binding InformationList, ElementName=streams}"
+                       Style="{StaticResource InfoStatusBarItemStyle}"/>
+    </StackPanel>
+</UserControl>

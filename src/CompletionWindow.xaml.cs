@@ -66,6 +66,9 @@ public partial class CompletionWindow : Window
 
         HwndSource source = HwndSource.FromHwnd(hwnd);
         source.AddHook(WndProc);
+
+        // Set ScrollViewer in the CompletionList(ListBox)
+        CompletionList.TryFindChild<ScrollViewer>(out _completionScrollViewer);
     }
 
     /// <summary>
@@ -132,6 +135,11 @@ public partial class CompletionWindow : Window
     }
 
     /// <summary>
+    /// ScrollViewer in the <seealso cref="CompletionList"/>.
+    /// </summary>
+    private ScrollViewer? _completionScrollViewer;
+
+    /// <summary>
     /// Scroll the selected item into view in the completion list
     /// </summary>
     /// <param name="index"></param>
@@ -140,6 +148,26 @@ public partial class CompletionWindow : Window
         if (index < 0 || index > CurrentCommandCompletion.CompletionMatches.Count - 1)
             return;
         CompletionList.ScrollIntoView(CurrentCommandCompletion.CompletionMatches[index]);
+    }
+
+    /// <summary>
+    /// Move down or up through the selection list by 1 page * <paramref name="factor"/>.
+    /// </summary>
+    /// <param name="down"></param>
+    /// <param name="factor"></param>
+    private void MovePage(bool down, double factor)
+    {
+        if (_completionScrollViewer is null)
+            return;
+        var sv = _completionScrollViewer;
+
+        int currentIndex = CompletionList.SelectedIndex;
+        int delta = (int)(sv.ViewportHeight * factor);
+        var index = Math.Clamp(currentIndex + (down ? delta : -delta),
+                               0,
+                               CurrentCommandCompletion.CompletionMatches.Count - 1);
+        sv.ScrollSelectedIndexToCenterLogical(index);
+        CompletionList.SelectedIndex = index;
     }
 
     /// <summary>
@@ -247,6 +275,20 @@ public partial class CompletionWindow : Window
             case Key.P when Keyboard.Modifiers is ModifierKeys.Control:
             case Key.Tab when Keyboard.Modifiers is ModifierKeys.Shift:
                 SelectPrevious();
+                return true;
+            case Key.PageDown:
+            case Key.F when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(true, 1);
+                return true;
+            case Key.PageUp:
+            case Key.B when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(false, 1);
+                return true;
+            case Key.D when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(true, 0.5);
+                return true;
+            case Key.U when Keyboard.Modifiers is ModifierKeys.Control:
+                MovePage(false, 0.5);
                 return true;
         }
         return false;

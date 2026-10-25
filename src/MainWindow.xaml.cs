@@ -1,9 +1,8 @@
 using PSLauncher.Models;
+using PSLauncher.Shell;
 using PSLauncher.Views;
-using System.Collections;
 using System.ComponentModel;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -37,8 +36,6 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        var runspace = App.Runspace;
-        runspace.AvailabilityChanged += Runspace_AvailabilityChanged;
         CommandBox.Focus();
         InitCommandBox();
         InitLocationBox();
@@ -56,37 +53,28 @@ public partial class MainWindow : Window
         }
     }
 
-    public const string CommandPrefix = @"Start-Process";
-
-    private PowerShell? _currentPowerShell;
-    public bool IsRunspaceRunning { get; private set; }
-
-    private void Runspace_AvailabilityChanged(object? sender, RunspaceAvailabilityEventArgs e)
+    private void StopExcution(object sender, RoutedEventArgs e)
     {
-        UpdateRunspaceAvailablity(e.RunspaceAvailability);
-    }
-    private void UpdateRunspaceAvailablity(RunspaceAvailability availability)
-    {
-        StopRunspaceButton.Dispatcher.InvokeAsync(() =>
+        if (ExecutionStatus.IsRunning
+            && psExectionStopSource is { IsCancellationRequested: false })
         {
-            StopRunspaceButton.IsEnabled = IsRunspaceRunning = availability switch
-            {
-                RunspaceAvailability.None or RunspaceAvailability.Available => false,
-                _ => true,
-            };
-        }, DispatcherPriority.Background);
-    }
-    private void StopRunspace(object sender, RoutedEventArgs e)
-    {
-        if (IsRunspaceRunning)
-        {
-            _currentPowerShell?.Stop();
+            psExectionStopSource.Cancel();
         }
     }
 
+    private void CanStopExecution(object sender, CanExecuteRoutedEventArgs e)
+    {
+        e.CanExecute = ExecutionStatus.IsRunning;
+    }
+
+    public const string CommandPrefix = @"Start-Process";
+
+    private CancellationTokenSource? psExectionStopSource;
+
     private async Task ExecuteScript(string script)
     {
-        if (IsRunspaceRunning)
+        var runner = PowerShellRunner.Main;
+        if (runner.IsRunning)
             return;
 
         if (string.IsNullOrWhiteSpace(script))
@@ -97,44 +85,76 @@ public partial class MainWindow : Window
         {
             script = $@"{CommandPrefix} {script[1..]}";
         }
-        using var ps = _currentPowerShell = PowerShell.Create(App.Runspace);
-        try
-        {
-            ps.Commands.Clear();
-            ps.AddScript(script);
-            var results = await ps.InvokeAsync();
 
-            UpdateStatus();
-            ShowResult(results);
-        }
-        catch (PipelineStoppedException)
+        runner.OnOutput += OnOutput;
+
+        StreamStatusPanel.ClearStreams();
+
+        psExectionStopSource = new();
+        using (psExectionStopSource)
         {
-            // ignore
+            try
+            {
+                PSDataCollection<PSObject> psResults;
+                try
+                {
+                    ExecutionStatus.Start();
+                    psResults = await runner.InvokeAsync(script, cancellationToken: psExectionStopSource.Token);
+                }
+                finally
+                {
+                    ExecutionStatus.Stop();
+                }
+
+                await ShowResult(psResults);
+            }
+            catch (PipelineStoppedException stoppedException)
+            {
+                // when canceled by user operation.
+                if (psExectionStopSource.IsCancellationRequested)
+                {
+                    ExecutionStatus.TooltipText = stoppedException.Message;
+                }
+                else
+                {
+                    ShowResult(stoppedException);
+                }
+            }
+            catch (ParseException parseException)
+            {
+                ExecutionStatus.TooltipText = parseException.Message;
+            }
+            catch (Exception ex)
+            {
+                ShowResult(ex);
+            }
+            finally
+            {
+                runner.OnOutput -= OnOutput;
+                UpdateStatus();
+            }
         }
-        catch (Exception ex)
+
+        void OnOutput(object? sender, PSOutputEventArgs e)
         {
-            ShowResult(ex);
-        }
-        finally
-        {
-            _currentPowerShell = null;
+            StreamStatusPanel.Dispatcher.InvokeAsync(() => StreamStatusPanel.AddRecord(e.Record), DispatcherPriority.Background);
         }
     }
 
-    private void ShowResult(PSDataCollection<PSObject> psDataCollection)
+    private async Task ShowResult(PSDataCollection<PSObject> psDataCollection, CancellationToken cancellationToken = default)
     {
-        var results = ResultList.Build(psDataCollection);
-        ResultContent.Content = results;
+        var results = await ResultList.BuildAsync(psDataCollection, cancellationToken);
+        ResultContent.DataContext = results;
     }
     private void ShowResult(object obj)
     {
         var results = ResultList.Build(obj);
-        ResultContent.Content = results;
+        ResultContent.DataContext = results;
     }
 
     private void UpdateStatus()
     {
-        var cwd = App.Runspace.SessionStateProxy.Path.CurrentLocation.Path;
+        var cwd = RunspaceManager.MainRunspace.SessionStateProxy.Path.CurrentLocation.Path;
         PushLocation(cwd);
     }
 

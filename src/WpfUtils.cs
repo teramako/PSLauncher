@@ -155,7 +155,7 @@ internal static class WpfUtils
     /// Please note that the result may differ from the intuitive “character count”
     /// due to inline elements, ligatures, surrogate pairs, and other factors within rich text.
     /// </remarks>
-    /// <value>The character offset of the caret within the current line (starting at 0)</value>
+    /// <returns>The character offset of the caret within the current line (starting at 0)</returns>
     public static int GetCaretIndex(RichTextBox richTextBox)
 
     {
@@ -194,4 +194,18 @@ internal static class WpfUtils
         return pointer;
     }
     #endregion
+
+    /// <summary>
+    /// Centers the selected item within the ScrollViewer's viewport
+    /// using logical (item-based) scrolling of VirtualizingStackPanel.
+    /// </summary>
+    /// <param name="scrollViewer"></param>
+    /// <param name="selectedIndex"></param>
+    public static void ScrollSelectedIndexToCenterLogical(this ScrollViewer scrollViewer, int selectedIndex)
+    {
+        var offset = Math.Clamp(selectedIndex - (scrollViewer.ViewportHeight / 2),
+                                0,
+                                scrollViewer.ScrollableHeight);
+        scrollViewer.ScrollToVerticalOffset(offset);
+    }
 }

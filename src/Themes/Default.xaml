@@ -51,4 +51,59 @@
         <Setter Property="Padding" Value="5,0,5,0"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+
+    <!-- Balloon Popup Template -->
+    <Style x:Key="BalloonPopupBroderStyle" TargetType="Border">
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Color x:Key="DefaultPopupBackgroundColor">#383838</Color>
+    <SolidColorBrush x:Key="DefaultBalloonPopupBackgroundColorBrush" Color="{StaticResource DefaultPopupBackgroundColor}"/>
+    <ControlTemplate x:Key="BottomBalloonTemplate" TargetType="ContentControl">
+        <Grid RowDefinitions="10, Auto">
+            <Path Grid.Row="0" Data="M20,10 L30,0 L40,10 Z" Fill="{TemplateBinding Background}"/>
+            <Border Grid.Row="1" Background="{TemplateBinding Background}" Style="{StaticResource BalloonPopupBroderStyle}">
+                <ContentPresenter/>
+            </Border>
+        </Grid>
+    </ControlTemplate>
+
+    <!-- ResultView -->
+    <Style x:Key="ResultStackPanelStyle" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Vertical"/>
+        <Style.Triggers>
+            <Trigger Property="DataContext" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="ResultTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="IsReadOnlyCaretVisible" Value="True"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="MaxHeight" Value="200"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="ResultExpanderStyle" TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Setter Property="IsExpanded" Value="True"/>
+        <Setter Property="Padding" Value="0,3,0,3"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Kind}" Value="Complex">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Kind}" Value="Files">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

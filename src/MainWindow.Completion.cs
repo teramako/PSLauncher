@@ -1,3 +1,5 @@
+using PSLauncher.Shell;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
 using System.Windows;
@@ -19,15 +21,19 @@ public partial class MainWindow
     public bool IsCompletionWindowVisible => _completionWindow is { IsVisible: true };
 
     /// <summary>
-    /// Starts the completion process by retrieving possible completions
+    /// Starts the completion process asynchronously by retrieving possible completions
     /// and displaying them in a completion window if necessary.
     /// </summary>
+    /// <remarks>
+    /// This method is <c>async void</c> because it is intended to be called from UI events
+    /// and does not need to return a task.
+    /// </remarks>
     /// <param name="autoAcceptSingleMatch">
     /// If set to true, automatically accepts the single match if only one completion is found.
     /// </param>
-    private void StartCompletion(bool autoAcceptSingleMatch = false)
+    private async void StartCompletionAsync(bool autoAcceptSingleMatch = false)
     {
-        CommandCompletion? commandCompletion = GetCompletions();
+        CommandCompletion? commandCompletion = await GetCompletionsAsync();
         switch (commandCompletion?.CompletionMatches.Count)
         {
             case null:
@@ -92,7 +98,7 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// Gets the command completions for the current text in the command box.
+    /// Asynchronously retrieves command completions for the current text in the command box.
     /// </summary>
     /// <remarks>
     /// This method uses the PowerShell TabExpansion2 command to retrieve possible
@@ -102,9 +108,9 @@ public partial class MainWindow
     /// </para>
     /// </remarks>
     /// <returns></returns>
-    private CommandCompletion? GetCompletions()
+    private async Task<CommandCompletion?> GetCompletionsAsync()
     {
-        if (IsRunspaceRunning)
+        if (PowerShellRunner.Main.IsRunning)
             return null;
 
         var cursorPos = WpfUtils.GetCaretIndex(CommandBox);
@@ -116,22 +122,24 @@ public partial class MainWindow
             offset = CommandPrefix.Length;
         }
 
-        using var ps = PowerShell.Create(App.Runspace);
+        using CancellationTokenSource cts = new(1000); // timeout: 1 second
         try
         {
-            ps.Commands.Clear();
-            var results = ps.AddCommand("TabExpansion2")
-                            .AddParameter("inputScript", script)
-                            .AddParameter("cursorColumn", cursorPos + offset)
-                            .Invoke();
-            if (results?.Count > 0 && results[0].BaseObject is CommandCompletion cc)
+            PSCommand cmd = new();
+            cmd.AddCommand("TabExpansion2")
+                .AddParameter("inputScript", script)
+                .AddParameter("cursorColumn", cursorPos + offset);
+            PSDataCollection<CommandCompletion> results =
+                await PowerShellRunner.Main.SimpleInvokeAsync<CommandCompletion>(cmd, cts.Token);
+            if (results.Count > 0 && results[0] is CommandCompletion cc)
             {
                 cc.ReplacementIndex -= offset;
                 return cc;
             }
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.Print($"Exception: {ex}");
         }
         return null;
     }
