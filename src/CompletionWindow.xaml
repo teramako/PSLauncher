@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PSLauncher"
+        xmlns:powershell="clr-namespace:System.Management.Automation;assembly=System.Management.Automation"
         mc:Ignorable="d"
         Title="CompletionWindow"
         MaxWidth="600"
@@ -34,8 +35,18 @@
                      MouseDoubleClick="OnDoubleClick"
                      >
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding ListItemText}" ToolTip="{Binding ToolTip}"/>
+                    <DataTemplate d:DataType="powershell:CompletionResult">
+                        <StackPanel Orientation="Horizontal">
+                            <Control >
+                                <Control.Template>
+                                    <MultiBinding Converter="{StaticResource IconConverter}">
+                                        <Binding/>
+                                        <Binding RelativeSource="{RelativeSource AncestorType=local:CompletionWindow}"/>
+                                    </MultiBinding>
+                                </Control.Template>
+                            </Control>
+                            <TextBlock Text="{Binding ListItemText}" ToolTip="{Binding ToolTip}" Margin="3,0,0,0"/>
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

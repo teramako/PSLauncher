@@ -1,5 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converter="clr-namespace:PSLauncher.Converters">
+
     <Color x:Key="PopupBackgroundColor">#2C2C2C</Color>
     <SolidColorBrush x:Key="PopupBackgroundBrush" Color="{DynamicResource PopupBackgroundColor}"/>
     <SolidColorBrush x:Key="CompletionWindowBackgroundColorBrush" Color="{StaticResource DefaultPopupBackgroundColor}"/>
@@ -36,4 +38,148 @@
         <Setter Property="MinWidth" Value="300"/>
         <Setter Property="MaxWidth" Value="600"/>
     </Style>
+
+    <converter:CompletionResultToIconConverter x:Key="IconConverter"/>
+
+    <!--
+        CompletionResult: 0.Text
+    -->
+    <SolidColorBrush x:Key="TextIconColorBrush" Color="#CE9178"/>
+    <ControlTemplate x:Key="TextIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolStringPath1}" Fill="{StaticResource TextIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolStringPath2}" Fill="{StaticResource TextIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolStringPath3}" Fill="{StaticResource TextIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 1.History
+    -->
+    <SolidColorBrush x:Key="HistoryIconColorBrush" Color="#89D185"/>
+    <ControlTemplate x:Key="HistoryIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource HistoryPath}" Fill="{StaticResource HistoryIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 2.Command
+    -->
+    <SolidColorBrush x:Key="CommandIconColorBrush" Color="#4FC1FF"/>
+    <ControlTemplate x:Key="CommandIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource PlayCirclePath}" Fill="{StaticResource CommandIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 3.ProviderItem
+    -->
+    <SolidColorBrush x:Key="ProviderItemIconColorBrush" Color="#C8C8C8"/>
+    <ControlTemplate x:Key="ProviderItemIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource FilePath}" Fill="{StaticResource ProviderItemIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 4.ProviderContainer
+    -->
+    <SolidColorBrush x:Key="ProviderContainerIconColorBrush" Color="#D7BA7D"/>
+    <ControlTemplate x:Key="ProviderContainerIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource FolderPath}" Fill="{StaticResource ProviderContainerIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 5.Property
+    -->
+    <SolidColorBrush x:Key="PropertyIconColorBrush" Color="#4EC9B0"/>
+    <ControlTemplate x:Key="PropertyIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolPropertyPath}" Fill="{StaticResource PropertyIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 6.Method
+    -->
+    <SolidColorBrush x:Key="MethodIconColorBrush" Color="#DCDCAA"/>
+    <ControlTemplate x:Key="MethodIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolMethodPath}" Fill="{StaticResource MethodIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 7.ParameterName
+    -->
+    <SolidColorBrush x:Key="ParameterNameIconColorBrush" Color="#C586C0"/>
+    <ControlTemplate x:Key="ParameterNameIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolEnumPath}" Fill="{StaticResource ParameterNameIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 8.ParameterValue
+    -->
+    <SolidColorBrush x:Key="ParameterValueIconColorBrush" Color="#D7BAFF"/>
+    <ControlTemplate x:Key="ParameterValueIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolEnumMemberPath}" Fill="{StaticResource ParameterValueIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 9.Variable
+    -->
+    <SolidColorBrush x:Key="VariableIconColorBrush" Color="#9CDCFE"/>
+    <ControlTemplate x:Key="VariableIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource VariablePath1}" Fill="{StaticResource VariableIconColorBrush}"/>
+            <Path Data="{StaticResource VariablePath2}" Fill="{StaticResource VariableIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 10.Namespace
+    -->
+    <SolidColorBrush x:Key="NamespaceIconColorBrush" Color="#4EC9B0"/>
+    <ControlTemplate x:Key="NamespaceIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolNamespacePath}" Fill="{StaticResource NamespaceIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 11.Type
+    -->
+    <SolidColorBrush x:Key="TypeIconColorBrush" Color="#4FC1FF"/>
+    <ControlTemplate x:Key="TypeIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolClass}" Fill="{StaticResource TypeIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 12.Keyword
+    -->
+    <SolidColorBrush x:Key="KeywordIconColorBrush" Color="#569CD6"/>
+    <ControlTemplate x:Key="KeywordIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolKeywordPath1}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath2}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath3}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath4}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath5}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath6}" Fill="{StaticResource KeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath7}" Fill="{StaticResource KeywordIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
+    <!--
+        CompletionResult: 13.DynamicKeyword
+    -->
+    <SolidColorBrush x:Key="DynamicKeywordIconColorBrush" Color="#D16D9E"/>
+    <ControlTemplate x:Key="DynamicKeywordIcon" TargetType="Control">
+        <Grid Width="16" Height="16">
+            <Path Data="{StaticResource SymbolKeywordPath1}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath2}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath3}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath4}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath5}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath6}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolKeywordPath7}" Fill="{StaticResource DynamicKeywordIconColorBrush}"/>
+        </Grid>
+    </ControlTemplate>
 </ResourceDictionary>
