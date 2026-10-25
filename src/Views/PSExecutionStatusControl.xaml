@@ -7,7 +7,7 @@
              xmlns:main="clr-namespace:PSLauncher"
              mc:Ignorable="d" 
              d:DesignHeight="32" d:DesignWidth="100"
-             x:Name="root" Loaded="root_Loaded">
+             x:Name="root">
     <UserControl.Resources>
         <!-- Stop Execution Button Style -->
         <Style x:Key="StopExecutionButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
