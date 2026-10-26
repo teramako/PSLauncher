@@ -50,7 +50,7 @@ public class ResultList : INotifyPropertyChanged
     public void Append(object? data)
     {
         var c = Count;
-        Items.Add(new ResultData($"[{c}]", data));
+        Items.Add(new ResultData(c, data));
         Count = c + 1;
     }
 

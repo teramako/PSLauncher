@@ -6,6 +6,16 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
+public enum ObjectNodeType
+{
+    [Icon("PropertyNodeIcon")]
+    Property,
+    [Icon("FieldNodeIcon")]
+    Field,
+    [Icon("IndexNodeIcon")]
+    Index
+}
+
 public class ResultData : INotifyPropertyChanged, IResultData
 {
     public string Name { get; set; }
@@ -28,11 +38,16 @@ public class ResultData : INotifyPropertyChanged, IResultData
             PropertyChanged?.Invoke(this, new(nameof(IsExpaned)));
         }
     }
+    public ObjectNodeType NodeType { get; }
 
-    public ResultData(string name, object? rawValue)
+    public ResultData(int index, object? rawValue) : this($"[{index}]", rawValue, ObjectNodeType.Index)
+    { 
+    }
+    public ResultData(string name, object? rawValue, ObjectNodeType nodeType)
     {
         Name = name;
         RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
+        NodeType = nodeType;
         if (rawValue is null)
         {
             Type = "(null)";
@@ -95,7 +110,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
         int index = 0;
         foreach (var item in enumerable)
         {
-            yield return new($"[{index++}]", Utils.GetBaseObject(item));
+            yield return new(index++, Utils.GetBaseObject(item));
         }
     }
 
@@ -103,7 +118,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
     {
         for (var i = 0; i < array.Length; i++)
         {
-            yield return new($"[{i}]", Utils.GetBaseObject(array.GetValue(i)));
+            yield return new(i, Utils.GetBaseObject(array.GetValue(i)));
         }
     }
 
@@ -112,7 +127,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
         foreach (var key in dictionary.Keys)
         {
             var value = dictionary[key];
-            yield return new($"{key}", Utils.GetBaseObject(value));
+            yield return new($"{key}", Utils.GetBaseObject(value), ObjectNodeType.Index);
         }
     }
 
@@ -124,7 +139,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
             {
                 continue; // Skip methods
             }
-            yield return new(property.Name, Utils.GetBaseObject(property.Value));
+            yield return new(property.Name, Utils.GetBaseObject(property.Value), ObjectNodeType.Property);
         }
     }
 
@@ -137,7 +152,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
             try
             {
                 var value = property.GetValue(obj);
-                row = new(property.Name, Utils.GetBaseObject(value));
+                row = new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property);
             }
             catch (Exception ex)
             {
