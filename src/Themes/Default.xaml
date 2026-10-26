@@ -1,9 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:PSLauncher"
-                    xmlns:converters="clr-namespace:PSLauncher.Converters">
+                    xmlns:converter="clr-namespace:PSLauncher.Converters">
 
-    <converters:IndentConverter x:Key="IndentConverter"/>
+    <converter:IndentConverter x:Key="IndentConverter"/>
 
     <!-- Expand Button Style in DataGrid -->
     <Style x:Key="ExpandToggleStyle" TargetType="ToggleButton">
