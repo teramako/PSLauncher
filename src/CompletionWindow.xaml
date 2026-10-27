@@ -37,7 +37,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate d:DataType="powershell:CompletionResult">
                         <StackPanel Orientation="Horizontal">
-                            <Control >
+                            <Control>
                                 <Control.Template>
                                     <MultiBinding Converter="{StaticResource IconConverter}">
                                         <Binding/>

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PSLauncher.Views"
              xmlns:model="clr-namespace:PSLauncher.Models"
+             xmlns:converter="clr-namespace:PSLauncher.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=model:ResultList}"
@@ -17,6 +18,7 @@
                     <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top">
                         <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
                                       Click="OnToggleRowExpander"/>
+                        <Control Template="{Binding NodeType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
                         <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
                     </DockPanel>
                 </DataTemplate>
@@ -33,12 +35,18 @@
         <DataGridTemplateColumn x:Key="ValueColumn" Header="Value" Width="*" CanUserSort="False" IsReadOnly="True">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate d:DataType="model:ResultData">
-                    <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" MaxHeight="35"/>
+                    <DockPanel>
+                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
+                        <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" MaxHeight="35"/>
+                    </DockPanel>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate d:DataType="model:ResultData">
-                    <TextBox Text="{Binding RawValue, Mode=OneTime}"/>
+                    <DockPanel>
+                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
+                        <TextBox Text="{Binding RawValue, Mode=OneTime}"/>
+                    </DockPanel>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>

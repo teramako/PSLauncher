@@ -23,4 +23,10 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.*" PrivateAssets="all" ExcludeAssets="runtime" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="PSModules\PSLauncher\PSLauncher.psm1">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
