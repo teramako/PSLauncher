@@ -26,6 +26,7 @@ public class FileResultData(FileSystemInfo file) : IResultData, INotifyPropertyC
         }
     }
     public ObjectNodeType NodeType { get; }
+    public ObjectValueType ValueType => IsDirectory ? ObjectValueType.Directory : ObjectValueType.File;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public static IEnumerable<FileResultData> ExtractObject(DirectoryInfo parentDir)
