@@ -149,7 +149,7 @@
     <SolidColorBrush x:Key="TypeIconColorBrush" Color="#4FC1FF"/>
     <ControlTemplate x:Key="TypeIcon" TargetType="Control">
         <Grid Width="16" Height="16">
-            <Path Data="{StaticResource SymbolClass}" Fill="{StaticResource TypeIconColorBrush}"/>
+            <Path Data="{StaticResource SymbolClassPath}" Fill="{StaticResource TypeIconColorBrush}"/>
         </Grid>
     </ControlTemplate>
     <!--
