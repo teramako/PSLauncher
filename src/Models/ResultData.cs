@@ -7,16 +7,6 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public enum ObjectNodeType
-{
-    [Icon("PropertyNodeIcon")]
-    Property,
-    [Icon("FieldNodeIcon")]
-    Field,
-    [Icon("IndexNodeIcon")]
-    Index
-}
-
 public enum ObjectValueType
 {
     [Icon("NullTypeIcon")]
