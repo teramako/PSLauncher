@@ -80,7 +80,7 @@ public class ResultList : INotifyPropertyChanged
             : ResultData.ExtractObject(parentRow.RawValue);
         foreach (var child in children)
         {
-            child.Level = parentLevel + 1;
+            child.SetParent(parentRow);
             Items.Insert(++index, child);
             hasChilren = true;
         }
@@ -206,10 +206,11 @@ public class ResultList : INotifyPropertyChanged
         else if (isFileSystemInfo)
         {
             var fileInfos = objects.OfType<FileSystemInfo>();
+            int index = 0;
             return new ResultList
             {
                 RootObject = psObjects,
-                Items = new(fileInfos.Select(file => new FileResultData(file))),
+                Items = new(fileInfos.Select(file => new FileResultData(file, index++))),
                 Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
                 Kind = ResultDataKind.Files,
             };

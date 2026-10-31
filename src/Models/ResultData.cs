@@ -9,6 +9,8 @@ namespace PSLauncher.Models;
 
 public class ResultData : INotifyPropertyChanged, IResultData
 {
+    public int Index { get; }
+    public IResultData? Parent { get; private set; }
     public string Name { get; set; }
     public string Type { get; set; }
     public Type? RawType { get; }
@@ -32,35 +34,32 @@ public class ResultData : INotifyPropertyChanged, IResultData
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; } = ObjectValueType.Null;
 
-    public ResultData(int index, object? rawValue) : this($"[{index}]", rawValue, ObjectNodeType.Index)
-    { 
-    }
-    public ResultData(string name, object? rawValue, ObjectNodeType nodeType)
+    public ResultData(int index, object? rawValue)
+        : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
     {
-        Name = name;
-        RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
-        NodeType = nodeType;
-        if (rawValue is null)
-        {
-            Type = "(null)";
-        }
-        else
-        {
-            RawType = rawValue.GetType();
-            Type = RawType is null ? "(null)" : Utils.GetTypeName(RawType);
-            (Value, HasChildren, ValueType) = ValueToString(rawValue);
-        }
     }
-    public ResultData(string name, object? rawValue, Type? type)
+    public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index)
+        : this(name, rawValue, rawValue?.GetType(), nodeType, index)
     {
+    }
+    public ResultData(string name, object? rawValue, Type? type, ObjectNodeType nodeType, int index)
+    {
+        Index = index;
         Name = name;
         RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
         RawType = type;
+        NodeType = nodeType;
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void SetParent(IResultData parent)
+    {
+        Parent = parent;
+        Level = parent.Level + 1;
+    }
 
     public static (string, bool, ObjectValueType) ValueToString(object? value)
     {
@@ -120,27 +119,30 @@ public class ResultData : INotifyPropertyChanged, IResultData
 
     private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary)
     {
+        int index = 0;
         foreach (var key in dictionary.Keys)
         {
             var value = dictionary[key];
-            yield return new($"{key}", Utils.GetBaseObject(value), ObjectNodeType.Index);
+            yield return new($"{key}", Utils.GetBaseObject(value), ObjectNodeType.Index, index++);
         }
     }
 
     private static IEnumerable<ResultData> ExtractPSObject(PSObject pso)
     {
+        int index = 0;
         foreach (var property in pso.Properties)
         {
             if (property.MemberType is PSMemberTypes.Method or PSMemberTypes.ScriptMethod or PSMemberTypes.ScriptProperty)
             {
                 continue; // Skip methods
             }
-            yield return new(property.Name, Utils.GetBaseObject(property.Value), ObjectNodeType.Property);
+            yield return new(property.Name, Utils.GetBaseObject(property.Value), ObjectNodeType.Property, index++);
         }
     }
 
     private static IEnumerable<ResultData> ExtractGenericObject(object obj)
     {
+        int index = 0;
         var type = obj.GetType();
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -148,11 +150,11 @@ public class ResultData : INotifyPropertyChanged, IResultData
             try
             {
                 var value = property.GetValue(obj);
-                row = new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property);
+                row = new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property, index++);
             }
             catch (Exception ex)
             {
-                row = new(property.Name, ex, property.DeclaringType);
+                row = new(property.Name, ex, property.DeclaringType, ObjectNodeType.Property, index++);
             }
             yield return row;
         }

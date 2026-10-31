@@ -2,6 +2,8 @@ namespace PSLauncher.Models;
 
 public interface IResultData
 {
+    int Index { get; }
+    IResultData? Parent { get; }
     string Name { get; }
     object? RawValue { get; }
     int Level { get; set; }
@@ -9,4 +11,5 @@ public interface IResultData
     bool IsExpaned { get; set; }
     ObjectNodeType NodeType { get; }
     ObjectValueType ValueType { get; }
+    void SetParent(IResultData parent);
 }
