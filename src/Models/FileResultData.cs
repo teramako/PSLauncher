@@ -46,4 +46,10 @@ public class FileResultData(FileSystemInfo file, int index) : IResultData, INoti
             yield return fileData;
         }
     }
+
+    public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
+        ["Name"] = (items, asc) => ResultList.SortTreeItems(items, static x => x.Name, asc),
+        ["LastWriteTime"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.LastWriteTime, asc),
+        ["Size"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.Size, asc),
+    };
 }

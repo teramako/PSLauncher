@@ -50,7 +50,8 @@
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
-        <DataGridTextColumn x:Key="TypeColumn" Header="Type" Binding="{Binding Type}" Width="Auto" IsReadOnly="True"/>
+        <DataGridTextColumn x:Key="TypeColumn" Header="Type" Binding="{Binding Type}" Width="Auto" IsReadOnly="True"
+                            SortMemberPath="Type"/>
         <!-- DataGrid columns for File view -->
         <DataGridTemplateColumn x:Key="FileNameColumn" Header="Name" Width="*" SortMemberPath="Name">
             <DataGridTemplateColumn.CellTemplate>
@@ -74,9 +75,11 @@
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
         <DataGridTextColumn x:Key="FileLastModifiedColumn" Header="Last Modified" Width="Auto"
+                            SortMemberPath="LastWriteTime"
                             Binding="{Binding LastWriteTime, StringFormat='yyyy/MM/dd HH:mm:ss'}"
                             IsReadOnly="True"/>
         <DataGridTextColumn x:Key="FileSizeColumn" Header="Size" Width="Auto"
+                            SortMemberPath="Size"
                             Binding="{Binding Size, StringFormat='N0'}" TextBlock.TextAlignment="Right"
                             IsReadOnly="True"/>
     </UserControl.Resources>
@@ -88,5 +91,5 @@
               HeadersVisibility="Column"
               GotFocus="OnGotFocus"
               PreviewKeyDown="OnRowPreviewKeyDown"
-              ItemsSource="{Binding Items}"/>
+              ItemsSource="{Binding Items}" Sorting="OnSorting"/>
 </UserControl>

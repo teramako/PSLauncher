@@ -159,4 +159,9 @@ public class ResultData : INotifyPropertyChanged, IResultData
             yield return row;
         }
     }
+
+    public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
+        ["Name"] = (items, asc) => ResultList.SortTreeItems(items, static x => x.Name, asc),
+        ["Type"] = (items, asc) => ResultList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
+    };
 }

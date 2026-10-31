@@ -1,4 +1,5 @@
 using PSLauncher.Models;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -133,5 +134,24 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
         var selectedIndex = dataGrid.SelectedIndex;
         e.Handled = (DataContext as ResultList)?.Toggle(selectedIndex) ?? false;
+    }
+
+    private void OnSorting(object sender, DataGridSortingEventArgs e)
+    {
+        if (DataContext is not ResultList dataList)
+            return;
+        var col = e.Column;
+        var currentDirection = col.SortDirection;
+        ListSortDirection? sortDirection = currentDirection switch
+        {
+            ListSortDirection.Ascending => ListSortDirection.Descending,
+            ListSortDirection.Descending => null,
+            _ => ListSortDirection.Ascending,
+        };
+        if (dataList.Sort(sortDirection, col.SortMemberPath))
+        {
+            col.SortDirection = sortDirection;
+            e.Handled = true;
+        }
     }
 }
