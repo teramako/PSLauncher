@@ -75,9 +75,9 @@ public class ResultList : INotifyPropertyChanged
             return;
         var parentLevel = parentRow.Level;
         bool hasChilren = false;
-        IEnumerable<IResultData> children = Kind is ResultDataKind.Files && parentRow.RawValue is DirectoryInfo dir
-            ? FileResultData.ExtractObject(dir)
-            : ResultData.ExtractObject(parentRow.RawValue);
+        IEnumerable<IResultData> children = Kind is ResultDataKind.Files
+            ? FileResultData.ExtractObject(parentRow)
+            : ResultData.ExtractObject(parentRow);
         if (Sorter.Sorter is not null)
             children = Sorter.Sorter(children, Sorter.Ascending);
         foreach (var child in children)

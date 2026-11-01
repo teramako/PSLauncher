@@ -7,5 +7,7 @@ public enum ObjectNodeType
     [Icon("FieldNodeIcon")]
     Field,
     [Icon("IndexNodeIcon")]
-    Index
+    Index,
+    [Icon("VirtualRowIcon")]
+    VirtualRow,
 }

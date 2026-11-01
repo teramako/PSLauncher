@@ -50,6 +50,17 @@ public class ResultData : INotifyPropertyChanged, IResultData
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
     }
+    public ResultData(int index, string name, object? rawValue, string value, string type, ObjectNodeType nodeType, ObjectValueType valueType, bool hasChildren)
+    {
+        Index = index;
+        Name = name;
+        RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
+        Value = value;
+        Type = type;
+        ValueType = valueType;
+        NodeType = nodeType;
+        HasChildren = hasChildren;
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -83,7 +94,13 @@ public class ResultData : INotifyPropertyChanged, IResultData
         };
     }
 
-    public static IEnumerable<ResultData> ExtractObject(object value)
+    public static IEnumerable<ResultData> ExtractObject(IResultData data)
+    {
+        ExpandType expandType = data is VirtualRowData virtualRow ? virtualRow.ExpandType : ExpandType.Default;
+        return ExtractObject(data.RawValue, expandType);
+    }
+
+    public static IEnumerable<ResultData> ExtractObject(object? value, ExpandType expandType = ExpandType.Default)
     {
         var obj = Utils.GetBaseObject(value);
         return obj switch
@@ -91,19 +108,30 @@ public class ResultData : INotifyPropertyChanged, IResultData
             null or string or int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool
                 => [],
             Array array => ExtractArray(array),
-            IDictionary dictionary => ExtractDictionaryObject(dictionary),
-            IEnumerable enumerable => ExtractEnumerableObject(enumerable),
+            IDictionary dictionary => ExtractDictionaryObject(dictionary, expandType),
+            IEnumerable enumerable => ExtractEnumerableObject(enumerable, expandType),
             PSObject pso => ExtractPSObject(pso),
             _ => ExtractGenericObject(obj)
         };
     }
 
-    private static IEnumerable<ResultData> ExtractEnumerableObject(IEnumerable enumerable)
+    private static IEnumerable<ResultData> ExtractEnumerableObject(IEnumerable enumerable,
+                                                                   ExpandType expandType = ExpandType.Default)
     {
         int index = 0;
-        foreach (var item in enumerable)
+        switch (expandType)
         {
-            yield return new(index++, Utils.GetBaseObject(item));
+            case ExpandType.Default:
+                yield return new VirtualRowData("Members", enumerable, -1, ExpandType.Members);
+                foreach (var item in enumerable)
+                {
+                    yield return new(index++, Utils.GetBaseObject(item));
+                }
+                break;
+            case ExpandType.Members:
+                foreach (var memberData in ExtractGenericObject(enumerable))
+                    yield return memberData;
+                break;
         }
     }
 
@@ -115,13 +143,23 @@ public class ResultData : INotifyPropertyChanged, IResultData
         }
     }
 
-    private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary)
+    private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary,
+                                                                   ExpandType expandType = ExpandType.Default)
     {
         int index = 0;
-        foreach (var key in dictionary.Keys)
+        switch (expandType)
         {
-            var value = dictionary[key];
-            yield return new($"{key}", Utils.GetBaseObject(value), ObjectNodeType.Index, index++);
+            case ExpandType.Default:
+                yield return new VirtualRowData("Members", dictionary, -1, ExpandType.Members);
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    yield return new($"{entry.Key}", Utils.GetBaseObject(entry.Value), ObjectNodeType.Index, index++);
+                }
+                break;
+            case ExpandType.Members:
+                foreach (var memberData in ExtractGenericObject(dictionary))
+                    yield return memberData;
+                break;
         }
     }
 

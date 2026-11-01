@@ -37,6 +37,11 @@ public class FileResultData(FileSystemInfo file, int index) : IResultData, INoti
         Level = parent.Level + 1;
     }
 
+    public static IEnumerable<FileResultData> ExtractObject(IResultData data)
+    {
+        return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];
+    }
+
     public static IEnumerable<FileResultData> ExtractObject(DirectoryInfo parentDir)
     {
         int index = 0;
