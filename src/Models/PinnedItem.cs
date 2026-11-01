@@ -97,7 +97,7 @@ public class PinnedItem : ResultList
         IEnumerable<IResultData> items = RootObject switch
         {
             DirectoryInfo dir => FileResultData.ExtractObject(dir),
-            FileInfo file => [new FileResultData(file)],
+            FileInfo file => [new FileResultData(file, 0)],
             _ => ResultData.ExtractObject(RootObject),
         };
         foreach (var item in items)

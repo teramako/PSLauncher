@@ -75,12 +75,14 @@ public class ResultList : INotifyPropertyChanged
             return;
         var parentLevel = parentRow.Level;
         bool hasChilren = false;
-        IEnumerable<IResultData> children = Kind is ResultDataKind.Files && parentRow.RawValue is DirectoryInfo dir
-            ? FileResultData.ExtractObject(dir)
-            : ResultData.ExtractObject(parentRow.RawValue);
+        IEnumerable<IResultData> children = Kind is ResultDataKind.Files
+            ? FileResultData.ExtractObject(parentRow)
+            : ResultData.ExtractObject(parentRow);
+        if (Sorter.Sorter is not null)
+            children = Sorter.Sorter(children, Sorter.Ascending);
         foreach (var child in children)
         {
-            child.Level = parentLevel + 1;
+            child.SetParent(parentRow);
             Items.Insert(++index, child);
             hasChilren = true;
         }
@@ -206,10 +208,11 @@ public class ResultList : INotifyPropertyChanged
         else if (isFileSystemInfo)
         {
             var fileInfos = objects.OfType<FileSystemInfo>();
+            int index = 0;
             return new ResultList
             {
                 RootObject = psObjects,
-                Items = new(fileInfos.Select(file => new FileResultData(file))),
+                Items = new(fileInfos.Select(file => new FileResultData(file, index++))),
                 Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
                 Kind = ResultDataKind.Files,
             };
@@ -222,6 +225,118 @@ public class ResultList : INotifyPropertyChanged
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
             Kind = ResultDataKind.Complex,
         };
+    }
+
+    private (Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>? Sorter, bool Ascending) Sorter = (null, true);
+
+    public bool Sort(ListSortDirection? sortDirection, string colName = "Name")
+    {
+        Sorter = (null, false);
+        List<IResultData> results;
+        if (sortDirection is null)
+        {
+            results = [.. SortTreeItems(Items, x => x.Index)];
+        }
+        else
+        {
+            bool ascending = sortDirection is ListSortDirection.Ascending;
+            switch (Kind)
+            {
+                case ResultDataKind.NotSpecified:
+                case ResultDataKind.Simple:
+                    return false;
+                case ResultDataKind.Files:
+                    if (!FileResultData.Sorters.TryGetValue(colName, out var fileSorter))
+                        return false;
+                    results = [.. fileSorter(Items, ascending)];
+                    Sorter = (fileSorter, ascending);
+                    break;
+                case ResultDataKind.Complex:
+                default:
+                    if (!ResultData.Sorters.TryGetValue(colName, out var sorter))
+                        return false;
+                    results = [.. sorter(Items, ascending)];
+                    Sorter = (sorter, ascending);
+                    break;
+
+            }
+        }
+        Items.Clear();
+        results.ForEach(Items.Add);
+        return true;
+    }
+
+    private static Dictionary<IResultData, List<T>> BuildChildrenMap<T>(IEnumerable<T> originalItems, out List<T> rootItems)
+        where T : IResultData
+    {
+        rootItems = [];
+        Dictionary<IResultData, List<T>> childrenMap = [];
+        foreach (var item in originalItems)
+        {
+            if (item.Parent is null)
+            {
+                rootItems.Add(item);
+                continue;
+            }
+            if (childrenMap.TryGetValue(item.Parent, out var children))
+            {
+                children.Add(item);
+            }
+            else
+            {
+                childrenMap.Add(item.Parent, [item]);
+            }
+        }
+        return childrenMap;
+    }
+    private static IEnumerable<T> EnumerateTreeItems<T>(IEnumerable<T> items, Dictionary<IResultData, List<T>> childrenMap)
+        where T : IResultData
+    {
+        foreach (var item in items)
+        {
+            yield return item;
+            if (item.IsExpaned && childrenMap.TryGetValue(item, out var children))
+            {
+                foreach (var child in EnumerateTreeItems(children, childrenMap))
+                    yield return child;
+            }
+        }
+    }
+    public static IEnumerable<T> SortTreeItems<T, TKey>(IEnumerable<T> originalItems,
+                                                        Func<T, TKey> keySelector,
+                                                        bool ascending = true)
+        where T : IResultData
+    {
+        var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
+        foreach (var kv in childrenMap)
+        {
+            childrenMap[kv.Key] = [.. SortItems(kv.Value)];
+        }
+
+        return EnumerateTreeItems(SortItems(rootItems), childrenMap);
+
+        IEnumerable<T> SortItems(IEnumerable<T> items)
+        {
+            return ascending ? items.OrderBy(keySelector) : items.OrderByDescending(keySelector);
+        }
+    }
+    public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
+                                                  Comparison<T> comparison,
+                                                  bool ascending = true)
+        where T : IResultData
+    {
+        return SortTreeItems(originalItems, Comparer<T>.Create(ascending ? comparison : (x, y) => comparison(y, x)));
+    }
+    public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
+                                                  IComparer<T> comparer)
+        where T : IResultData
+    {
+        var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
+        foreach (var kv in childrenMap)
+        {
+            childrenMap[kv.Key] = [.. kv.Value.Order(comparer)];
+        }
+        return EnumerateTreeItems(rootItems.Order(comparer), childrenMap);
     }
 
     /// <summary>

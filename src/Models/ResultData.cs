@@ -7,52 +7,12 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public enum ObjectNodeType
-{
-    [Icon("PropertyNodeIcon")]
-    Property,
-    [Icon("FieldNodeIcon")]
-    Field,
-    [Icon("IndexNodeIcon")]
-    Index
-}
-
-public enum ObjectValueType
-{
-    [Icon("NullTypeIcon")]
-    Null,
-    [Icon("StringTypeIcon")]
-    String,
-    [Icon("NumberTypeIcon")]
-    Number,
-    [Icon("BooleanTypeIcon")]
-    Boolean,
-    [Icon("EnumValueTypeIcon")]
-    Enum,
-    [Icon("StructTypeIcon")]
-    Struct,
-    [Icon("ClassTypeIcon")]
-    Class,
-    [Icon("ExceptionTypeIcon")]
-    Exception,
-    [Icon("DirectoryTypeIcon")]
-    Directory,
-    [Icon("FileTypeIcon")]
-    File,
-    [Icon("CollectionTypeIcon")]
-    Collection,
-    [Icon("DictionaryTypeIcon")]
-    Dictionary,
-    [Icon("TemporalTypeIcon")]
-    Temporal,
-
-}
-
 public class ResultData : INotifyPropertyChanged, IResultData
 {
+    public int Index { get; }
+    public IResultData? Parent { get; private set; }
     public string Name { get; set; }
     public string Type { get; set; }
-    public Type? RawType { get; }
     public string Value { get; set; } = string.Empty;
     public object? RawValue { get; }
 
@@ -73,35 +33,42 @@ public class ResultData : INotifyPropertyChanged, IResultData
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; } = ObjectValueType.Null;
 
-    public ResultData(int index, object? rawValue) : this($"[{index}]", rawValue, ObjectNodeType.Index)
-    { 
-    }
-    public ResultData(string name, object? rawValue, ObjectNodeType nodeType)
+    public ResultData(int index, object? rawValue)
+        : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
     {
+    }
+    public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index)
+        : this(name, rawValue, rawValue?.GetType(), nodeType, index)
+    {
+    }
+    public ResultData(string name, object? rawValue, Type? type, ObjectNodeType nodeType, int index)
+    {
+        Index = index;
         Name = name;
         RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
         NodeType = nodeType;
-        if (rawValue is null)
-        {
-            Type = "(null)";
-        }
-        else
-        {
-            RawType = rawValue.GetType();
-            Type = RawType is null ? "(null)" : Utils.GetTypeName(RawType);
-            (Value, HasChildren, ValueType) = ValueToString(rawValue);
-        }
-    }
-    public ResultData(string name, object? rawValue, Type? type)
-    {
-        Name = name;
-        RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
-        RawType = type;
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
     }
+    public ResultData(int index, string name, object? rawValue, string value, string type, ObjectNodeType nodeType, ObjectValueType valueType, bool hasChildren)
+    {
+        Index = index;
+        Name = name;
+        RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
+        Value = value;
+        Type = type;
+        ValueType = valueType;
+        NodeType = nodeType;
+        HasChildren = hasChildren;
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void SetParent(IResultData parent)
+    {
+        Parent = parent;
+        Level = parent.Level + 1;
+    }
 
     public static (string, bool, ObjectValueType) ValueToString(object? value)
     {
@@ -127,7 +94,13 @@ public class ResultData : INotifyPropertyChanged, IResultData
         };
     }
 
-    public static IEnumerable<ResultData> ExtractObject(object value)
+    public static IEnumerable<ResultData> ExtractObject(IResultData data)
+    {
+        ExpandType expandType = data is VirtualRowData virtualRow ? virtualRow.ExpandType : ExpandType.Default;
+        return ExtractObject(data.RawValue, expandType);
+    }
+
+    public static IEnumerable<ResultData> ExtractObject(object? value, ExpandType expandType = ExpandType.Default)
     {
         var obj = Utils.GetBaseObject(value);
         return obj switch
@@ -135,19 +108,30 @@ public class ResultData : INotifyPropertyChanged, IResultData
             null or string or int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool
                 => [],
             Array array => ExtractArray(array),
-            IDictionary dictionary => ExtractDictionaryObject(dictionary),
-            IEnumerable enumerable => ExtractEnumerableObject(enumerable),
+            IDictionary dictionary => ExtractDictionaryObject(dictionary, expandType),
+            IEnumerable enumerable => ExtractEnumerableObject(enumerable, expandType),
             PSObject pso => ExtractPSObject(pso),
             _ => ExtractGenericObject(obj)
         };
     }
 
-    private static IEnumerable<ResultData> ExtractEnumerableObject(IEnumerable enumerable)
+    private static IEnumerable<ResultData> ExtractEnumerableObject(IEnumerable enumerable,
+                                                                   ExpandType expandType = ExpandType.Default)
     {
         int index = 0;
-        foreach (var item in enumerable)
+        switch (expandType)
         {
-            yield return new(index++, Utils.GetBaseObject(item));
+            case ExpandType.Default:
+                yield return new VirtualRowData("Members", enumerable, -1, ExpandType.Members);
+                foreach (var item in enumerable)
+                {
+                    yield return new(index++, Utils.GetBaseObject(item));
+                }
+                break;
+            case ExpandType.Members:
+                foreach (var memberData in ExtractGenericObject(enumerable))
+                    yield return memberData;
+                break;
         }
     }
 
@@ -159,43 +143,96 @@ public class ResultData : INotifyPropertyChanged, IResultData
         }
     }
 
-    private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary)
+    private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary,
+                                                                   ExpandType expandType = ExpandType.Default)
     {
-        foreach (var key in dictionary.Keys)
+        int index = 0;
+        switch (expandType)
         {
-            var value = dictionary[key];
-            yield return new($"{key}", Utils.GetBaseObject(value), ObjectNodeType.Index);
+            case ExpandType.Default:
+                yield return new VirtualRowData("Members", dictionary, -1, ExpandType.Members);
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    yield return new($"{entry.Key}", Utils.GetBaseObject(entry.Value), ObjectNodeType.Index, index++);
+                }
+                break;
+            case ExpandType.Members:
+                foreach (var memberData in ExtractGenericObject(dictionary))
+                    yield return memberData;
+                break;
         }
     }
 
     private static IEnumerable<ResultData> ExtractPSObject(PSObject pso)
     {
+        int index = 0;
         foreach (var property in pso.Properties)
         {
             if (property.MemberType is PSMemberTypes.Method or PSMemberTypes.ScriptMethod or PSMemberTypes.ScriptProperty)
             {
                 continue; // Skip methods
             }
-            yield return new(property.Name, Utils.GetBaseObject(property.Value), ObjectNodeType.Property);
+            yield return new(property.Name, Utils.GetBaseObject(property.Value), ObjectNodeType.Property, index++);
         }
     }
 
     private static IEnumerable<ResultData> ExtractGenericObject(object obj)
     {
+        int index = int.MinValue;
         var type = obj.GetType();
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var member in type.GetMembers())
         {
-            ResultData row;
+            switch (member)
+            {
+                case PropertyInfo prop:
+                    if (prop.GetIndexParameters().Length > 0) continue; // Skip indexers
+                    yield return CreatePropertyData(prop);
+                    continue;
+                case FieldInfo field:
+                    yield return CreateFieldData(field);
+                    continue;
+                default:
+                    continue;
+            }
+        }
+
+        ResultData CreatePropertyData(PropertyInfo property)
+        {
             try
             {
                 var value = property.GetValue(obj);
-                row = new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property);
+                return new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property, index++);
             }
             catch (Exception ex)
             {
-                row = new(property.Name, ex, property.DeclaringType);
+                return new(property.Name, ex, property.PropertyType, ObjectNodeType.Property, index++);
             }
-            yield return row;
+        }
+        ResultData CreateFieldData(FieldInfo field)
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                return new(field.Name, Utils.GetBaseObject(value), ObjectNodeType.Field, index++);
+            }
+            catch (Exception ex)
+            {
+                return new(field.Name, ex, field.FieldType, ObjectNodeType.Field, index++);
+            }
         }
     }
+
+    public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
+        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+        {
+            if (x.NodeType == y.NodeType)
+            {
+                return x.NodeType is ObjectNodeType.Index
+                       ? x.Index.CompareTo(y.Index)
+                       : x.Name.CompareTo(y.Name);
+            }
+            return x.NodeType.CompareTo(y.NodeType);
+        }, asc),
+        ["Type"] = (items, asc) => ResultList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
+    };
 }
