@@ -320,6 +320,24 @@ public class ResultList : INotifyPropertyChanged
             return ascending ? items.OrderBy(keySelector) : items.OrderByDescending(keySelector);
         }
     }
+    public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
+                                                  Comparison<T> comparison,
+                                                  bool ascending = true)
+        where T : IResultData
+    {
+        return SortTreeItems(originalItems, Comparer<T>.Create(ascending ? comparison : (x, y) => comparison(y, x)));
+    }
+    public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
+                                                  IComparer<T> comparer)
+        where T : IResultData
+    {
+        var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
+        foreach (var kv in childrenMap)
+        {
+            childrenMap[kv.Key] = [.. kv.Value.Order(comparer)];
+        }
+        return EnumerateTreeItems(rootItems.Order(comparer), childrenMap);
+    }
 
     /// <summary>
     /// Build <seealso cref="ResultList"/> instance from a single <seealso cref="PSObject"/>

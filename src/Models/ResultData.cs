@@ -161,7 +161,16 @@ public class ResultData : INotifyPropertyChanged, IResultData
     }
 
     public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
-        ["Name"] = (items, asc) => ResultList.SortTreeItems(items, static x => x.Name, asc),
+        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+        {
+            if (x.NodeType == y.NodeType)
+            {
+                return x.NodeType is ObjectNodeType.Index
+                       ? x.Index.CompareTo(y.Index)
+                       : x.Name.CompareTo(y.Name);
+            }
+            return x.NodeType.CompareTo(y.NodeType);
+        }, asc),
         ["Type"] = (items, asc) => ResultList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
     };
 }
