@@ -13,7 +13,6 @@ public class ResultData : INotifyPropertyChanged, IResultData
     public IResultData? Parent { get; private set; }
     public string Name { get; set; }
     public string Type { get; set; }
-    public Type? RawType { get; }
     public string Value { get; set; } = string.Empty;
     public object? RawValue { get; }
 
@@ -47,7 +46,6 @@ public class ResultData : INotifyPropertyChanged, IResultData
         Index = index;
         Name = name;
         RawValue = Utils.IsRefStructObject(rawValue) ? null : rawValue;
-        RawType = type;
         NodeType = nodeType;
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
