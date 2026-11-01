@@ -142,21 +142,47 @@ public class ResultData : INotifyPropertyChanged, IResultData
 
     private static IEnumerable<ResultData> ExtractGenericObject(object obj)
     {
-        int index = 0;
+        int index = int.MinValue;
         var type = obj.GetType();
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var member in type.GetMembers())
         {
-            ResultData row;
+            switch (member)
+            {
+                case PropertyInfo prop:
+                    if (prop.GetIndexParameters().Length > 0) continue; // Skip indexers
+                    yield return CreatePropertyData(prop);
+                    continue;
+                case FieldInfo field:
+                    yield return CreateFieldData(field);
+                    continue;
+                default:
+                    continue;
+            }
+        }
+
+        ResultData CreatePropertyData(PropertyInfo property)
+        {
             try
             {
                 var value = property.GetValue(obj);
-                row = new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property, index++);
+                return new(property.Name, Utils.GetBaseObject(value), ObjectNodeType.Property, index++);
             }
             catch (Exception ex)
             {
-                row = new(property.Name, ex, property.DeclaringType, ObjectNodeType.Property, index++);
+                return new(property.Name, ex, property.PropertyType, ObjectNodeType.Property, index++);
             }
-            yield return row;
+        }
+        ResultData CreateFieldData(FieldInfo field)
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                return new(field.Name, Utils.GetBaseObject(value), ObjectNodeType.Field, index++);
+            }
+            catch (Exception ex)
+            {
+                return new(field.Name, ex, field.FieldType, ObjectNodeType.Field, index++);
+            }
         }
     }
 
