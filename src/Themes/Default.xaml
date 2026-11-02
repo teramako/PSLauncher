@@ -97,7 +97,7 @@
         <Setter Property="IsExpanded" Value="True"/>
         <Setter Property="Padding" Value="0,3,0,3"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Kind}" Value="Complex">
+            <DataTrigger Binding="{Binding Kind}" Value="Objects">
                 <Setter Property="Visibility" Value="Visible"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Kind}" Value="Files">

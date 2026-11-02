@@ -50,33 +50,33 @@ public class PinnedItem : ResultList
                 DisplayData = fileInfo.FullName;
                 break;
             case Array array:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = baseType;
                 ToolTipText = $"{baseType} {{ Length = {array.Length} }}";
                 break;
             case IDictionary dictionary:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = baseType;
                 ToolTipText = $"{baseType} {{ Count = {dictionary.Count} }}";
                 break;
             case ICollection collection:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = baseType;
                 ToolTipText = $"{baseType} {{ Count = {collection.Count} }}";
                 break;
             case PSObject pso:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = $"PSObject({pso.TypeNames[0]})";
                 DisplayData = ToolTipText = $"{pso}";
                 break;
             case Exception ex:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = baseType;
                 ToolTipText = $"{baseType}: {ex.Message}";
                 DisplayData = $"{ex}";
                 break;
             default:
-                Kind = ResultDataKind.Complex;
+                Kind = ResultDataKind.Objects;
                 Description = baseType;
                 ToolTipText = Utils.GetTypeName(obj.GetType(), abbreviate: true, dropNamespace: false);
                 DisplayData = Utils.ObjectToString(obj);

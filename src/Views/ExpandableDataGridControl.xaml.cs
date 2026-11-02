@@ -17,7 +17,7 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         InitializeComponent();
     }
 
-    private List<DataGridColumn>? ComplexDataGridColumns;
+    private List<DataGridColumn>? ObjectDataGridColumns;
     private List<DataGridColumn>? FileDataGridColumns;
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -39,8 +39,8 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         List<DataGridColumn> columns;
         switch (newList.Kind)
         {
-            case ResultDataKind.Complex:
-                columns = ComplexDataGridColumns ??=
+            case ResultDataKind.Objects:
+                columns = ObjectDataGridColumns ??=
                 [
                     (DataGridTemplateColumn)Resources["NameColumn"],
                     (DataGridTemplateColumn)Resources["ValueColumn"],

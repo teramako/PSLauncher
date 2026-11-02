@@ -4,6 +4,6 @@ public enum ResultDataKind
 {
     NotSpecified = 0,
     Simple = 1,
-    Complex = 2,
+    Objects = 2,
     Files = 3,
 }

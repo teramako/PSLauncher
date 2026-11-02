@@ -223,7 +223,7 @@ public class ResultList : INotifyPropertyChanged
             RootObject = objects,
             Items = new(ResultData.ExtractObject(objects)),
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
-            Kind = ResultDataKind.Complex,
+            Kind = ResultDataKind.Objects,
         };
     }
 
@@ -251,7 +251,7 @@ public class ResultList : INotifyPropertyChanged
                     results = [.. fileSorter(Items, ascending)];
                     Sorter = (fileSorter, ascending);
                     break;
-                case ResultDataKind.Complex:
+                case ResultDataKind.Objects:
                 default:
                     if (!ResultData.Sorters.TryGetValue(colName, out var sorter))
                         return false;
@@ -413,27 +413,27 @@ public class ResultList : INotifyPropertyChanged
             {
                 RootObject = obj,
                 Items = new(ResultData.ExtractObject(array)),
-                Kind = ResultDataKind.Complex,
+                Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
             IDictionary dictionary => new ResultList
             {
                 RootObject = obj,
                 Items = new(ResultData.ExtractObject(dictionary)),
-                Kind = ResultDataKind.Complex,
+                Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
             ICollection collection => new ResultList()
             {
                 RootObject = obj,
-                Kind = ResultDataKind.Complex,
+                Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
             Exception ex => new ResultList()
             {
                 RootObject = obj,
                 Items = new(ResultData.ExtractObject(ex)),
-                Kind = ResultDataKind.Complex,
+                Kind = ResultDataKind.Objects,
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
             },
@@ -441,7 +441,7 @@ public class ResultList : INotifyPropertyChanged
             {
                 RootObject = obj,
                 Items = new(ResultData.ExtractObject(obj)),
-                Kind = ResultDataKind.Complex,
+                Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = Utils.ObjectToString(obj)
             },

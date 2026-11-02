@@ -11,7 +11,7 @@
              d:DataContext="{d:DesignInstance Type=model:ResultList}"
              DataContextChanged="OnDataContextChanged">
     <UserControl.Resources>
-        <!-- DataGrid columns for Complex view -->
+        <!-- DataGrid columns for Object view -->
         <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate d:DataType="model:ResultData">
