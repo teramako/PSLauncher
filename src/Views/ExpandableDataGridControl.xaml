@@ -13,7 +13,7 @@
              DataContextChanged="OnDataContextChanged">
     <UserControl.Resources>
         <!-- DataGrid columns for Object view -->
-        <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name">
+        <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name" IsReadOnly="True" CanUserReorder="False">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate d:DataType="model:ResultData">
                     <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top">
@@ -24,14 +24,6 @@
                     </DockPanel>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate d:DataType="model:ResultData">
-                    <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}">
-                        <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"/>
-                        <TextBox Text="{Binding Name, Mode=OneTime}"/>
-                    </DockPanel>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
         <DataGridTemplateColumn x:Key="ValueColumn" Header="Value" Width="*" CanUserSort="False" IsReadOnly="True">
             <DataGridTemplateColumn.CellTemplate>
@@ -42,14 +34,6 @@
                     </DockPanel>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate d:DataType="model:ResultData">
-                    <DockPanel>
-                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
-                        <TextBox Text="{Binding RawValue, Mode=OneTime}"/>
-                    </DockPanel>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
         <DataGridTextColumn x:Key="TypeColumn" Header="Type" Binding="{Binding Type}" Width="Auto" IsReadOnly="True"
                             SortMemberPath="Type"/>
