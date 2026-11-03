@@ -19,7 +19,7 @@
                     <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top">
                         <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
                                       Click="OnToggleRowExpander"/>
-                        <Control Template="{Binding NodeType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
+                        <Control Template="{Binding NodeType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0" Focusable="False"/>
                         <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
                     </DockPanel>
                 </DataTemplate>
@@ -29,7 +29,7 @@
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate d:DataType="model:ResultData">
                     <DockPanel>
-                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0"/>
+                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0" Focusable="False"/>
                         <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" MaxHeight="35"/>
                     </DockPanel>
                 </DataTemplate>
