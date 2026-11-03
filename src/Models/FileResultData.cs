@@ -37,6 +37,14 @@ public class FileResultData(FileSystemInfo file, int index) : IResultData, INoti
         Level = parent.Level + 1;
     }
 
+    public string GetColumnValue(string? columnName) => columnName switch
+    {
+        "Name" => Name,
+        "Size" => Size?.ToString() ?? string.Empty,
+        "LastWriteTime" => LastWriteTime.ToString(),
+        _ => string.Empty
+    };
+
     public static IEnumerable<FileResultData> ExtractObject(IResultData data)
     {
         return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];

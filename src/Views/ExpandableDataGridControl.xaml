@@ -25,7 +25,7 @@
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
         </DataGridTemplateColumn>
-        <DataGridTemplateColumn x:Key="ValueColumn" Header="Value" Width="*" CanUserSort="False" IsReadOnly="True">
+        <DataGridTemplateColumn x:Key="ValueColumn" Header="Value" Width="*" CanUserSort="False" SortMemberPath="Value" IsReadOnly="True">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate d:DataType="model:ResultData">
                     <DockPanel>

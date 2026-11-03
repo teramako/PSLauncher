@@ -70,6 +70,14 @@ public class ResultData : INotifyPropertyChanged, IResultData
         Level = parent.Level + 1;
     }
 
+    public string GetColumnValue(string? columnName) => columnName switch
+    {
+        "Name" => Name,
+        "Value" => Utils.ObjectToString(RawValue),
+        "Type" => Type,
+        _ => string.Empty
+    };
+
     public static (string, bool, ObjectValueType) ValueToString(object? value)
     {
         return value switch

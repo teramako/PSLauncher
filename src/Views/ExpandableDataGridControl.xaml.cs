@@ -222,12 +222,12 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
     private void OnCopyRow(object sender, ExecutedRoutedEventArgs e)
     {
-        var text = Root.SelectedItem switch
-        {
-            ResultData item => $"{item.Name}\t{Utils.ObjectToString(item.RawValue)}\t{item.Type}",
-            FileResultData file => $"{file.Name}\t{file.LastWriteTime}\t{file.Size}",
-            _ => string.Empty
-        };
+        if (Root.SelectedItem is not IResultData item)
+            return;
+        var columnValues = Root.Columns.Where(col => col.Visibility == Visibility.Visible)
+                                       .OrderBy(col => col.DisplayIndex)
+                                       .Select(col => item.GetColumnValue(col.SortMemberPath));
+        var text = string.Join("\t", columnValues);
         if (!string.IsNullOrEmpty(text))
         {
             Clipboard.SetText(text);

@@ -12,4 +12,5 @@ public interface IResultData
     ObjectNodeType NodeType { get; }
     ObjectValueType ValueType { get; }
     void SetParent(IResultData parent);
+    string GetColumnValue(string? columnName);
 }
