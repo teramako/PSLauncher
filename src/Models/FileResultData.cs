@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class FileResultData(FileSystemInfo file, int index) : IResultData, INotifyPropertyChanged
+public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyPropertyChanged, IResultData, IResultData<FileResultData>
 {
     public int Index => index;
     public IResultData? Parent { get; private set; }
@@ -60,7 +60,7 @@ public class FileResultData(FileSystemInfo file, int index) : IResultData, INoti
         }
     }
 
-    public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
+    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
         ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)

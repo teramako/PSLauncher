@@ -398,41 +398,43 @@ public class ResultList : INotifyPropertyChanged
             PSObject pso => new ResultList
             {
                 RootObject = obj,
-                Kind = ResultDataKind.Simple,
+                Items = ExpanedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow, 0)),
+                Kind = ResultDataKind.Objects,
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
             },
             DirectoryInfo dir => new ResultList
             {
                 RootObject = obj,
-                Items = new(FileResultData.ExtractObject(dir)),
+                Items = ExpanedItems(new FileResultData(dir)),
                 Kind = ResultDataKind.Files,
                 Description = $"{baseType} {{ FullName = {dir.FullName} }}",
             },
             Array array => new ResultList
             {
                 RootObject = obj,
-                Items = new(ResultData.ExtractObject(array)),
+                Items = ExpanedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow)),
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
             IDictionary dictionary => new ResultList
             {
                 RootObject = obj,
-                Items = new(ResultData.ExtractObject(dictionary)),
+                Items = ExpanedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow)),
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
-            ICollection collection => new ResultList()
+            ICollection collection => new ResultList
             {
                 RootObject = obj,
+                Items = ExpanedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow)),
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
-            Exception ex => new ResultList()
+            Exception ex => new ResultList
             {
                 RootObject = obj,
-                Items = new(ResultData.ExtractObject(ex)),
+                Items = ExpanedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow)),
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
@@ -440,12 +442,16 @@ public class ResultList : INotifyPropertyChanged
             _ => new ResultList
             {
                 RootObject = obj,
-                Items = new(ResultData.ExtractObject(obj)),
+                Items = ExpanedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow)),
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = Utils.ObjectToString(obj)
             },
         };
+        ObservableCollection<IResultData> ExpanedItems<T>(T parentRow) where T : IResultData<T>
+        {
+            return [parentRow, .. T.ExtractObject(parentRow).Select(item => { item.SetParent(parentRow); return item; })];
+        }
     }
 
     private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,

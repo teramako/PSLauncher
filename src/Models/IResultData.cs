@@ -14,3 +14,18 @@ public interface IResultData
     void SetParent(IResultData parent);
     string GetColumnValue(string? columnName);
 }
+
+public interface IResultData<T> : IResultData where T : IResultData
+{
+    /// <summary>
+    /// Extract the child nodes of <paramref name="data"/>
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    static abstract IEnumerable<T> ExtractObject(IResultData data);
+
+    /// <summary>
+    /// Sort functions by each column
+    /// </summary>
+    static abstract Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; }
+}

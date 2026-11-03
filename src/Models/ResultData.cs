@@ -7,7 +7,7 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultData : INotifyPropertyChanged, IResultData
+public class ResultData : INotifyPropertyChanged, IResultData, IResultData<ResultData>
 {
     public int Index { get; }
     public IResultData? Parent { get; private set; }
@@ -37,7 +37,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
         : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
     {
     }
-    public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index)
+    public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index = 0)
         : this(name, rawValue, rawValue?.GetType(), nodeType, index)
     {
     }
@@ -230,7 +230,7 @@ public class ResultData : INotifyPropertyChanged, IResultData
         }
     }
 
-    public static readonly Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters = new() {
+    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
         ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
