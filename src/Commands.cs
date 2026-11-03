@@ -6,6 +6,12 @@ public static class Commands
 {
     public static readonly RoutedUICommand FocusToResultContent = new("Focus Result", "FocusResult", typeof(Commands));
     public static readonly RoutedUICommand StopExecution = new("Stop Execution", "StopExecution", typeof(Commands));
-    public static readonly RoutedUICommand PinItem = new("Pin Item", "Pin", typeof(Commands));
-    public static readonly RoutedUICommand UnpinItem = new("Unpin Item", "Unpin", typeof(Commands));
+    public static readonly RoutedUICommand PinItem = new("Pin Item", "Pin", typeof(Commands))
+    {
+        InputGestures = { new KeyGesture(Key.P, ModifierKeys.Control) }
+    };
+    public static readonly RoutedUICommand UnpinItem = new("Unpin Item", "Unpin", typeof(Commands))
+    {
+        InputGestures = { new KeyGesture(Key.P, ModifierKeys.Control | ModifierKeys.Shift) }
+    };
 }
