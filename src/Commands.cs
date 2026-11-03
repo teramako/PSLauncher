@@ -14,4 +14,11 @@ public static class Commands
     {
         InputGestures = { new KeyGesture(Key.P, ModifierKeys.Control | ModifierKeys.Shift) }
     };
+
+    #region DataGrid
+    public static readonly RoutedUICommand CopyRow = new("Copy Row", "CopyRow", typeof(Commands))
+    {
+        InputGestures = { new KeyGesture(Key.C, ModifierKeys.Control | ModifierKeys.Shift) }
+    };
+    #endregion
 }

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:main="clr-namespace:PSLauncher"
              xmlns:local="clr-namespace:PSLauncher.Views"
              xmlns:model="clr-namespace:PSLauncher.Models"
              xmlns:converter="clr-namespace:PSLauncher.Converters"
@@ -82,6 +83,28 @@
                             SortMemberPath="Size"
                             Binding="{Binding Size, StringFormat='N0'}" TextBlock.TextAlignment="Right"
                             IsReadOnly="True"/>
+        <!-- Context Menu for Object view -->
+        <ContextMenu x:Key="ObjectsContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItem}"/>
+        </ContextMenu>
+        <!-- Context Menu for File view -->
+        <ContextMenu x:Key="FilesContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItem}"/>
+        </ContextMenu>
     </UserControl.Resources>
 
     <DataGrid x:Name="Root"
@@ -91,5 +114,14 @@
               HeadersVisibility="Column"
               GotFocus="OnGotFocus"
               PreviewKeyDown="OnRowPreviewKeyDown"
-              ItemsSource="{Binding Items}" Sorting="OnSorting"/>
+              ItemsSource="{Binding Items}" Sorting="OnSorting">
+        <DataGrid.CommandBindings>
+            <CommandBinding Command="ApplicationCommands.Copy" Executed="OnCopyValue" PreviewCanExecute="OnCanCopyValue"/>
+            <CommandBinding Command="{x:Static main:Commands.CopyRow}" Executed="OnCopyRow" PreviewCanExecute="OnCanCopyRow"/>
+        </DataGrid.CommandBindings>
+        <DataGrid.InputBindings>
+            <KeyBinding Command="ApplicationCommands.Copy" Key="C" Modifiers="Ctrl"/>
+            <KeyBinding Command="{x:Static main:Commands.CopyRow}" Key="C" Modifiers="Ctrl+Shift"/>
+        </DataGrid.InputBindings>
+    </DataGrid>
 </UserControl>
