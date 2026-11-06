@@ -12,6 +12,9 @@
              d:DataContext="{d:DesignInstance Type=model:ResultList}"
              DataContextChanged="OnDataContextChanged">
     <UserControl.Resources>
+        <ControlTemplate x:Key="IconImage">
+            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileResultData}"/>
+        </ControlTemplate>
         <!-- DataGrid columns for Object view -->
         <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name" IsReadOnly="True" CanUserReorder="False">
             <DataGridTemplateColumn.CellTemplate>
@@ -44,16 +47,21 @@
                     <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top" >
                         <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
                                       Click="OnToggleRowExpander"/>
-                        <Image Source="{Binding Icon}" Width="16" Height="16" Margin="2,0,2,0"/>
+                        <Control Name="icon" Template="{StaticResource IconImage}" Margin="0,0,3,0" Focusable="False"/>
                         <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
                     </DockPanel>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+                            <Setter TargetName="icon" Property="Template" Value="{Binding NodeType, Converter={StaticResource EnumIconConverter}}"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate d:DataType="model:FileResultData">
                     <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}">
                         <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"/>
-                        <Image Source="{Binding Icon}" Width="16" Height="16" Margin="2,0,2,0"/>
+                        <Control Template="{StaticResource IconImage}" Margin="0,0,3,0" Focusable="False"/>
                         <TextBox Text="{Binding Name, Mode=OneTime}"/>
                     </DockPanel>
                 </DataTemplate>
