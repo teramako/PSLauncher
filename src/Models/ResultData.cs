@@ -32,6 +32,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     }
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; } = ObjectValueType.Null;
+    public ExpandType ExpandType { get; } = ExpandType.Default;
 
     public ResultData(int index, object? rawValue)
         : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
@@ -40,6 +41,11 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index = 0)
         : this(name, rawValue, rawValue?.GetType(), nodeType, index)
     {
+    }
+    public ResultData(string name, object? rawValue, int index, ExpandType expandType)
+        : this(index, name, rawValue, string.Empty, string.Empty, ObjectNodeType.VirtualRow, ObjectValueType.Null, true)
+    {
+        ExpandType = expandType;
     }
     public ResultData(string name, object? rawValue, Type? type, ObjectNodeType nodeType, int index)
     {
@@ -80,8 +86,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
 
     public IEnumerable<IResultData> GetChildren()
     {
-        ExpandType expandType = this is VirtualRowData virtualRow ? virtualRow.ExpandType : ExpandType.Default;
-        foreach (var child in ExtractObject(RawValue, expandType))
+        foreach (var child in ExtractObject(RawValue, ExpandType))
         {
             child.SetParent(this);
             yield return child;
@@ -134,7 +139,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         switch (expandType)
         {
             case ExpandType.Default:
-                yield return new VirtualRowData("Members", enumerable, -1, ExpandType.Members);
+                yield return new ResultData("Members", enumerable, -1, ExpandType.Members);
                 foreach (var item in enumerable)
                 {
                     yield return new(index++, Utils.GetBaseObject(item));
@@ -162,7 +167,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         switch (expandType)
         {
             case ExpandType.Default:
-                yield return new VirtualRowData("Members", dictionary, -1, ExpandType.Members);
+                yield return new ResultData("Members", dictionary, -1, ExpandType.Members);
                 foreach (DictionaryEntry entry in dictionary)
                 {
                     yield return new($"{entry.Key}", Utils.GetBaseObject(entry.Value), ObjectNodeType.Index, index++);
