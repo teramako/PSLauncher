@@ -185,7 +185,7 @@ public class ResultList : INotifyPropertyChanged
         List<object?> objects = [];
         bool isString = false;
         bool isFileSystemInfo = false;
-        await foreach(var obj in NormalizePSObjects(psObjects, cancellationToken))
+        await foreach (var obj in NormalizePSObjects(psObjects, cancellationToken))
         {
             objects.Add(obj);
             isString = obj is string;
@@ -205,11 +205,20 @@ public class ResultList : INotifyPropertyChanged
         else if (isFileSystemInfo)
         {
             var fileInfos = objects.OfType<FileSystemInfo>();
+            Dictionary<string, List<FileSystemInfo>> childrenMap = [];
+            foreach (var fsInfo in fileInfos)
+            {
+                var parentPath = Path.GetDirectoryName(fsInfo.FullName) ?? string.Empty;
+                if (childrenMap.TryGetValue(parentPath, out var list))
+                    list.Add(fsInfo);
+                else
+                    childrenMap[parentPath] = [fsInfo];
+            }
             int index = 0;
             return new ResultList
             {
                 RootObject = psObjects,
-                Items = new(fileInfos.Select(file => new FileResultData(file, index++))),
+                Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
                 Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
                 Kind = ResultDataKind.Files,
             };

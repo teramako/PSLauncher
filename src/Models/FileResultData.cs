@@ -1,22 +1,50 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyPropertyChanged, IResultData, IResultData<FileResultData>
+public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<FileResultData>
 {
-    public int Index => index;
+    private readonly FileSystemInfo? file;
+    private readonly ReadOnlyCollection<FileSystemInfo>? children;
+
+    public FileResultData(FileSystemInfo file, int index = 0)
+        : this(file.Name, file.FullName, file is FileInfo f ? f.Length : null, file.LastWriteTime, file.Attributes.HasFlag(FileAttributes.Directory), index)
+    {
+        this.file = file;
+        HasChildren = IsDirectory = file.Attributes.HasFlag(FileAttributes.Directory);
+    }
+    public FileResultData(string name, IList<FileSystemInfo> children, int index = 0)
+        : this(name, string.Empty, null, null, true, index)
+    {
+        Name = name;
+        this.children = children.AsReadOnly();
+        NodeType = ObjectNodeType.VirtualRow;
+    }
+    public FileResultData(string name, string fullName, long? size, DateTime? lastWriteTime, bool isDirectory, int index = 0)
+    {
+        Name = name;
+        FullName = fullName;
+        Size = size;
+        LastWriteTime = lastWriteTime;
+        HasChildren = IsDirectory = isDirectory;
+        Index = index;
+        ValueType = isDirectory ? ObjectValueType.Directory : ObjectValueType.File;
+    }
+
+    public int Index { get; }
     public IResultData? Parent { get; private set; }
     public object? RawValue => file;
-    public string Name => file.Name;
-    public ImageSource? Icon => NativeMethods.GetIcon(file);
-    public string FullName => file.FullName;
-    public long? Size => IsDirectory ? null : ((FileInfo)file).Length;
-    public DateTime LastWriteTime => file.LastWriteTime;
-    public bool IsDirectory => file.Attributes.HasFlag(FileAttributes.Directory);
+    public string Name { get; }
+    public ImageSource? Icon => file is not null ? NativeMethods.GetIcon(file) : null;
+    public string FullName { get; }
+    public long? Size { get; }
+    public DateTime? LastWriteTime { get; }
+    public bool IsDirectory { get; }
     public int Level { get; set; } = 0;
-    public bool HasChildren { get; set; } = file.Attributes.HasFlag(FileAttributes.Directory);
+    public bool HasChildren { get; set; }
     public bool IsExpaned
     {
         get;
@@ -28,7 +56,7 @@ public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyProper
         }
     }
     public ObjectNodeType NodeType { get; }
-    public ObjectValueType ValueType => IsDirectory ? ObjectValueType.Directory : ObjectValueType.File;
+    public ObjectValueType ValueType { get; }
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void SetParent(IResultData parent)
@@ -41,13 +69,22 @@ public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyProper
     {
         "Name" => Name,
         "Size" => Size?.ToString() ?? string.Empty,
-        "LastWriteTime" => LastWriteTime.ToString(),
+        "LastWriteTime" => $"{LastWriteTime}",
         _ => string.Empty
     };
 
     public IEnumerable<IResultData> GetChildren()
     {
-        if (file is DirectoryInfo dirInfo)
+        if (children is not null)
+        {
+            for (int i = 0; i < children.Count; i++)
+            {
+                var childData = new FileResultData(children[i], i);
+                childData.SetParent(this);
+                yield return childData;
+            }
+        }
+        else if (file is DirectoryInfo dirInfo)
         {
             foreach (var child in ExtractObject(dirInfo))
             {
@@ -55,7 +92,7 @@ public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyProper
                 yield return child;
             }
         }
-        }
+    }
 
     public static IEnumerable<FileResultData> ExtractObject(IResultData data)
     {
