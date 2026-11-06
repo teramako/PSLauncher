@@ -71,22 +71,19 @@ public class ResultList : INotifyPropertyChanged
             throw new InvalidDataException("Items collection is null.");
 
         var parentRow = Items[index];
-        if (parentRow is null || parentRow.IsExpaned || parentRow.RawValue is null)
+        if (parentRow is null || parentRow.IsExpaned)
             return;
         var parentLevel = parentRow.Level;
-        bool hasChilren = false;
-        IEnumerable<IResultData> children = Kind is ResultDataKind.Files
-            ? FileResultData.ExtractObject(parentRow)
-            : ResultData.ExtractObject(parentRow);
-        if (Sorter.Sorter is not null)
-            children = Sorter.Sorter(children, Sorter.Ascending);
+        bool hasChildren = false;
+        IEnumerable<IResultData> children = Sorter.Sorter is not null
+                                            ? Sorter.Sorter(parentRow.GetChildren(), Sorter.Ascending)
+                                            : parentRow.GetChildren();
         foreach (var child in children)
         {
-            child.SetParent(parentRow);
             Items.Insert(++index, child);
-            hasChilren = true;
+            hasChildren = true;
         }
-        if (hasChilren)
+        if (hasChildren)
         {
             parentRow.IsExpaned = true;
         }
@@ -450,13 +447,12 @@ public class ResultList : INotifyPropertyChanged
             },
         };
     }
-    private static IEnumerable<T> BuildExpandedItems<T>(T parentRow) where T : IResultData<T>
+    private static IEnumerable<IResultData> BuildExpandedItems(IResultData parentRow)
     {
         yield return parentRow;
         bool hasChildren = false;
-        foreach (var item in T.ExtractObject(parentRow))
+        foreach (var item in parentRow.GetChildren())
         {
-            item.SetParent(parentRow);
             hasChildren = true;
             yield return item;
         }

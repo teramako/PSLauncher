@@ -13,17 +13,15 @@ public interface IResultData
     ObjectValueType ValueType { get; }
     void SetParent(IResultData parent);
     string GetColumnValue(string? columnName);
+    /// <summary>
+    /// Get child nodes
+    /// </summary>
+    /// <returns></returns>
+    IEnumerable<IResultData> GetChildren();
 }
 
 public interface IResultData<T> : IResultData where T : IResultData
 {
-    /// <summary>
-    /// Extract the child nodes of <paramref name="data"/>
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    static abstract IEnumerable<T> ExtractObject(IResultData data);
-
     /// <summary>
     /// Sort functions by each column
     /// </summary>

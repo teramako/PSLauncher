@@ -78,6 +78,16 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         _ => string.Empty
     };
 
+    public IEnumerable<IResultData> GetChildren()
+    {
+        ExpandType expandType = this is VirtualRowData virtualRow ? virtualRow.ExpandType : ExpandType.Default;
+        foreach (var child in ExtractObject(RawValue, expandType))
+        {
+            child.SetParent(this);
+            yield return child;
+        }
+    }
+
     public static (string, bool, ObjectValueType) ValueToString(object? value)
     {
         return value switch
@@ -100,12 +110,6 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
             DateTime or DateTimeOffset or TimeSpan => ($"{value}", true, ObjectValueType.Temporal),
             _ => ($"{value}", true, value.GetType().IsValueType ? ObjectValueType.Struct : ObjectValueType.Class)
         };
-    }
-
-    public static IEnumerable<ResultData> ExtractObject(IResultData data)
-    {
-        ExpandType expandType = data is VirtualRowData virtualRow ? virtualRow.ExpandType : ExpandType.Default;
-        return ExtractObject(data.RawValue, expandType);
     }
 
     public static IEnumerable<ResultData> ExtractObject(object? value, ExpandType expandType = ExpandType.Default)

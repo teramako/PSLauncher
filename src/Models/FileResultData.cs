@@ -45,6 +45,18 @@ public class FileResultData(FileSystemInfo file, int index = 0) :  INotifyProper
         _ => string.Empty
     };
 
+    public IEnumerable<IResultData> GetChildren()
+    {
+        if (file is DirectoryInfo dirInfo)
+        {
+            foreach (var child in ExtractObject(dirInfo))
+            {
+                child.SetParent(this);
+                yield return child;
+            }
+        }
+        }
+
     public static IEnumerable<FileResultData> ExtractObject(IResultData data)
     {
         return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];
