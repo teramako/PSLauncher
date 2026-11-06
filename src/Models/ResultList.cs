@@ -220,8 +220,8 @@ public class ResultList : INotifyPropertyChanged
 
         return new ResultList
         {
-            RootObject = objects,
-            Items = new(ResultData.ExtractObject(objects)),
+            RootObject = psObjects,
+            Items = [.. BuildExpandedItems(new ResultData("Results", psObjects, ObjectNodeType.VirtualRow))],
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
             Kind = ResultDataKind.Objects,
         };
@@ -398,43 +398,44 @@ public class ResultList : INotifyPropertyChanged
             PSObject pso => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow, 0)),
+                Items = [.. BuildExpandedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
             },
-            DirectoryInfo dir => new ResultList
+            FileSystemInfo fileSystemInfo => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new FileResultData(dir)),
+                Items = [.. BuildExpandedItems(new FileResultData(fileSystemInfo))],
                 Kind = ResultDataKind.Files,
-                Description = $"{baseType} {{ FullName = {dir.FullName} }}",
+                Description = baseType,
+                DisplayData = $"{fileSystemInfo.FullName}"
             },
             Array array => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow)),
+                Items = [.. BuildExpandedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
             IDictionary dictionary => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow)),
+                Items = [.. BuildExpandedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
             ICollection collection => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow)),
+                Items = [.. BuildExpandedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
             Exception ex => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow)),
+                Items = [.. BuildExpandedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
@@ -442,16 +443,24 @@ public class ResultList : INotifyPropertyChanged
             _ => new ResultList
             {
                 RootObject = obj,
-                Items = ExpanedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow)),
+                Items = [.. BuildExpandedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = Utils.ObjectToString(obj)
             },
         };
-        ObservableCollection<IResultData> ExpanedItems<T>(T parentRow) where T : IResultData<T>
+    }
+    private static IEnumerable<T> BuildExpandedItems<T>(T parentRow) where T : IResultData<T>
+    {
+        yield return parentRow;
+        bool hasChildren = false;
+        foreach (var item in T.ExtractObject(parentRow))
         {
-            return [parentRow, .. T.ExtractObject(parentRow).Select(item => { item.SetParent(parentRow); return item; })];
+            item.SetParent(parentRow);
+            hasChildren = true;
+            yield return item;
         }
+        parentRow.IsExpaned = hasChildren;
     }
 
     private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,
