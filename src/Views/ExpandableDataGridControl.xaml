@@ -92,7 +92,7 @@
 
     <DataGrid x:Name="Root"
               AutoGenerateColumns="False"
-              SelectionMode="Single" SelectionUnit="FullRow"
+              SelectionMode="Extended" SelectionUnit="FullRow"
               VerticalScrollBarVisibility="Auto"
               HeadersVisibility="Column"
               GotFocus="OnGotFocus"

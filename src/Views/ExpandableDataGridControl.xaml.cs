@@ -1,4 +1,5 @@
 using PSLauncher.Models;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -175,59 +176,61 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
     private void OnCanCopyValue(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = Root.SelectedItem is IResultData item && item.ValueType switch
+        e.CanExecute = Root.SelectedItems.OfType<IResultData>().Any(item => item.ValueType switch
         {
             ObjectValueType.Null => false,
             ObjectValueType.String or ObjectValueType.Number or ObjectValueType.Boolean
             or ObjectValueType.Enum or ObjectValueType.Temporal or ObjectValueType.Exception
             or ObjectValueType.File or ObjectValueType.Directory => true,
             _ => !string.IsNullOrEmpty(Utils.ObjectToString(item.RawValue))
-        };
+        });
         e.Handled = true;
     }
 
     private void OnCopyValue(object sender, ExecutedRoutedEventArgs e)
     {
-        if (Root.SelectedItem is IResultData item)
+        StringCollection files = [];
+        List<string> texts = [];
+        foreach (var item in Root.SelectedItems.OfType<IResultData>())
         {
             e.Handled = true;
             switch (item.ValueType)
             {
                 case ObjectValueType.File or ObjectValueType.Directory:
                     var filePath= $"{item.RawValue}";
-                    var data = new DataObject();
-                    data.SetFileDropList([filePath]);
-                    data.SetText(filePath);
-                    Clipboard.SetDataObject(data, true);
+                    files.Add(filePath);
+                    texts.Add(filePath);
                     break;
                 case ObjectValueType.String or ObjectValueType.Number:
                 case ObjectValueType.Boolean or ObjectValueType.Enum:
                 case ObjectValueType.Temporal or ObjectValueType.Exception:
-                    Clipboard.SetText($"{item.RawValue}");
+                    texts.Add($"{item.RawValue}");
                     break;
                 default:
                     var text = Utils.ObjectToString(item.RawValue);
-                    if (string.IsNullOrEmpty(text))
-                        return;
-                    Clipboard.SetText(text);
+                    texts.Add(text);
                     break;
             }
         }
+        var data = new DataObject();
+        if (files.Count > 0)
+            data.SetFileDropList(files);
+        if (texts.Count > 0)
+            data.SetText(string.Join(Environment.NewLine, texts));
+        Clipboard.SetDataObject(data, true);
     }
     private void OnCanCopyRow(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = Root.SelectedItem is IResultData;
+        e.CanExecute = Root.SelectedItems.Count > 0;
         e.Handled = true;
     }
 
     private void OnCopyRow(object sender, ExecutedRoutedEventArgs e)
     {
-        if (Root.SelectedItem is not IResultData item)
-            return;
-        var columnValues = Root.Columns.Where(col => col.Visibility == Visibility.Visible)
-                                       .OrderBy(col => col.DisplayIndex)
-                                       .Select(col => item.GetColumnValue(col.SortMemberPath));
-        var text = string.Join("\t", columnValues);
+        var items = Root.SelectedItems.OfType<IResultData>();
+        var columns = Root.Columns.Where(col => col.Visibility == Visibility.Visible).OrderBy(col => col.DisplayIndex);
+        var text = string.Join(Environment.NewLine,
+                               items.Select(item => string.Join("\t", columns.Select(col => item.GetColumnValue(col.SortMemberPath)))));
         if (!string.IsNullOrEmpty(text))
         {
             Clipboard.SetText(text);
