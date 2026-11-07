@@ -75,7 +75,7 @@
             <MenuItem Header="Copy Row"
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
-                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItem}"/>
+                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
         </ContextMenu>
         <!-- Context Menu for File view -->
         <ContextMenu x:Key="FilesContextMenu"
@@ -86,7 +86,7 @@
             <MenuItem Header="Copy Row"
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
-                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItem}"/>
+                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
         </ContextMenu>
     </UserControl.Resources>
 

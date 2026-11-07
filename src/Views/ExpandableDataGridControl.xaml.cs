@@ -136,8 +136,7 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
                 e.Handled = true;
                 break;
             case Key.P when Keyboard.Modifiers is ModifierKeys.Control:
-                var item = data.Items[selectedIndex];
-                Commands.PinItem.Execute(item, dataGrid);
+                Commands.PinItem.Execute(dataGrid.SelectedItems, dataGrid);
                 e.Handled = true;
                 break;
             default:
