@@ -11,6 +11,7 @@ public interface IResultData
     bool IsExpaned { get; set; }
     ObjectNodeType NodeType { get; }
     ObjectValueType ValueType { get; }
+    Type DataType { get; }
     void SetParent(IResultData parent);
     string GetColumnValue(string? columnName);
     /// <summary>

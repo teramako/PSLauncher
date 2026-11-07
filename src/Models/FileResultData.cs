@@ -57,6 +57,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
     }
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; }
+    public Type DataType { get; } = typeof(FileSystemInfo);
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void SetParent(IResultData parent)

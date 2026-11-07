@@ -33,13 +33,14 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; } = ObjectValueType.Null;
     public ExpandType ExpandType { get; } = ExpandType.Default;
+    public Type DataType { get; } = typeof(void);
 
     public ResultData(int index, object? rawValue)
         : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
     {
     }
     public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index = 0)
-        : this(name, rawValue, rawValue?.GetType(), nodeType, index)
+        : this(name, rawValue, rawValue?.GetType() ?? typeof(void), nodeType, index)
     {
     }
     public ResultData(string name, object? rawValue, int index, ExpandType expandType)
@@ -55,6 +56,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         NodeType = nodeType;
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
+        DataType = GetDataType(rawValue);
     }
     public ResultData(int index, string name, object? rawValue, string value, string type, ObjectNodeType nodeType, ObjectValueType valueType, bool hasChildren)
     {
@@ -66,6 +68,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         ValueType = valueType;
         NodeType = nodeType;
         HasChildren = hasChildren;
+        DataType = GetDataType(rawValue);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -114,6 +117,27 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
             DirectoryInfo dir => ($"{dir.FullName}", true, ObjectValueType.Directory),
             DateTime or DateTimeOffset or TimeSpan => ($"{value}", true, ObjectValueType.Temporal),
             _ => ($"{value}", true, value.GetType().IsValueType ? ObjectValueType.Struct : ObjectValueType.Class)
+        };
+    }
+
+    private static Type GetDataType(object? value)
+    {
+        return value switch
+        {
+            null => typeof(void),
+            string => typeof(string),
+            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal
+                => typeof(ValueType),
+            bool => typeof(ValueType),
+            Enum => typeof(ValueType),
+            Array => typeof(Array),
+            PSObject => typeof(PSObject),
+            IDictionary => typeof(IDictionary),
+            ICollection => typeof(ICollection),
+            Exception => typeof(Exception),
+            FileInfo => typeof(FileSystemInfo),
+            DirectoryInfo => typeof(FileSystemInfo),
+            _ => value.GetType()
         };
     }
 
