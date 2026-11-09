@@ -1,4 +1,5 @@
 using PSLauncher.Models;
+using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
@@ -236,4 +237,61 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
             e.Handled = true;
         }
     }
+
+    #region OpenInObjectsTreeWindow command handlers
+    private void OnCanOpenInObjectsTreeWindow(object sender, CanExecuteRoutedEventArgs e)
+    {
+        var items = Root.SelectedItems;
+        if (items.Count == 0)
+        {
+            e.CanExecute = false;
+            return;
+        }
+
+        if (items.Count == 1)
+        {
+            e.CanExecute = items[0] is IResultData data && data switch
+            {
+                { RawValue: null } => false,
+                { ValueType: ObjectValueType.Null } => false,
+                { ValueType: ObjectValueType.Boolean } => false,
+                { ValueType: ObjectValueType.Number } => false,
+                { ValueType: ObjectValueType.Enum } => false,
+                { ValueType: ObjectValueType.String } => false,
+                _ => true
+            };
+        }
+        else
+        {
+            e.CanExecute = !items.OfType<IResultData>().All(static x => x.NodeType is ObjectNodeType.VirtualRow);
+        }
+    }
+    private void OnOpenInObjectsTreeWindow(object sender, ExecutedRoutedEventArgs e)
+    {
+        IResultList resultList;
+        var items = Root.SelectedItems;
+        if (items.Count == 0)
+            return;
+        if (items.Count == 1)
+        {
+            if (items[0] is not IResultData data || data.RawValue is null || data.ValueType is ObjectValueType.Null)
+                return;
+
+            resultList = ResultList.Build(data.RawValue, ResultDataKind.Objects);
+        }
+        else
+        {
+            var list = items.OfType<IResultData>()
+                            .Where(static x => x.ValueType is not ObjectValueType.Null)
+                            .Select(static x => x.RawValue)
+                            .ToArray();
+            if (list.Length == 0)
+                return;
+            resultList = ResultList.Build(list, ResultDataKind.Objects);
+        }
+
+        var win = new ObjectsViewWindow(resultList);
+        win.Show();
+    }
+    #endregion
 }

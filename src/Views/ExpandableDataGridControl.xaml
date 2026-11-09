@@ -76,6 +76,9 @@
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
                       Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
         </ContextMenu>
         <!-- Context Menu for File view -->
         <ContextMenu x:Key="FilesContextMenu"
@@ -87,6 +90,9 @@
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
                       Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
         </ContextMenu>
     </UserControl.Resources>
 
@@ -101,6 +107,7 @@
         <DataGrid.CommandBindings>
             <CommandBinding Command="ApplicationCommands.Copy" Executed="OnCopyValue" PreviewCanExecute="OnCanCopyValue"/>
             <CommandBinding Command="{x:Static main:Commands.CopyRow}" Executed="OnCopyRow" PreviewCanExecute="OnCanCopyRow"/>
+            <CommandBinding Command="{x:Static main:Commands.OpenInObjectsTreeWindow}" Executed="OnOpenInObjectsTreeWindow" CanExecute="OnCanOpenInObjectsTreeWindow"/>
         </DataGrid.CommandBindings>
         <DataGrid.InputBindings>
             <KeyBinding Command="ApplicationCommands.Copy" Key="C" Modifiers="Ctrl"/>

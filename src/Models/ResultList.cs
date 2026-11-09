@@ -360,7 +360,7 @@ public class ResultList : INotifyPropertyChanged
     /// <param name="obj"></param>
     /// <returns></returns>
     [return: NotNullIfNotNull(nameof(obj))]
-    public static ResultList? Build(object? obj)
+    public static ResultList? Build(object? obj, ResultDataKind kind = ResultDataKind.NotSpecified)
     {
         if (obj is null)
         {
@@ -411,6 +411,14 @@ public class ResultList : INotifyPropertyChanged
                 Kind = ResultDataKind.Objects,
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
+            },
+            FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ResultList
+            {
+                RootObject = obj,
+                Items = [.. BuildExpandedItems(new ResultData("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
+                Kind = ResultDataKind.Objects,
+                Description = baseType,
+                DisplayData = $"{fileSystemInfo.FullName}"
             },
             FileSystemInfo fileSystemInfo => new ResultList
             {
