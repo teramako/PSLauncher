@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Management.Automation;
 using System.Runtime.CompilerServices;
@@ -350,6 +351,7 @@ public class ResultList : INotifyPropertyChanged
     /// </summary>
     /// <param name="psObject"></param>
     /// <returns></returns>
+    [return: NotNullIfNotNull(nameof(psObject))]
     public static ResultList? Build(PSObject? psObject) => Build(Utils.GetBaseObject(psObject));
 
     /// <summary>
@@ -357,6 +359,7 @@ public class ResultList : INotifyPropertyChanged
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
+    [return: NotNullIfNotNull(nameof(obj))]
     public static ResultList? Build(object? obj)
     {
         if (obj is null)
