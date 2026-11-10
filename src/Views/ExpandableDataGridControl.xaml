@@ -79,6 +79,8 @@
             <Separator/>
             <MenuItem Header="Open in Objects Tree Window"
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
         </ContextMenu>
         <!-- Context Menu for File view -->
         <ContextMenu x:Key="FilesContextMenu"
@@ -93,6 +95,8 @@
             <Separator/>
             <MenuItem Header="Open in Objects Tree Window"
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
         </ContextMenu>
     </UserControl.Resources>
 
@@ -108,6 +112,7 @@
             <CommandBinding Command="ApplicationCommands.Copy" Executed="OnCopyValue" PreviewCanExecute="OnCanCopyValue"/>
             <CommandBinding Command="{x:Static main:Commands.CopyRow}" Executed="OnCopyRow" PreviewCanExecute="OnCanCopyRow"/>
             <CommandBinding Command="{x:Static main:Commands.OpenInObjectsTreeWindow}" Executed="OnOpenInObjectsTreeWindow" CanExecute="OnCanOpenInObjectsTreeWindow"/>
+            <CommandBinding Command="{x:Static main:Commands.OpenInFilesTreeWindow}" Executed="OnOpenInFilesTreeWindow" CanExecute="OnCanOpenInFilesTreeWindow"/>
         </DataGrid.CommandBindings>
         <DataGrid.InputBindings>
             <KeyBinding Command="ApplicationCommands.Copy" Key="C" Modifiers="Ctrl"/>

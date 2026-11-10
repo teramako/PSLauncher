@@ -2,6 +2,7 @@ using PSLauncher.Models;
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -290,6 +291,26 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
             resultList = ResultList.Build(list, ResultDataKind.Objects);
         }
 
+        var win = new ObjectsViewWindow(resultList);
+        win.Show();
+    }
+    #endregion
+
+    #region OpenInFilesTreeWindow command handlers
+    private void OnCanOpenInFilesTreeWindow(object sender, CanExecuteRoutedEventArgs e)
+    {
+        var items = Root.SelectedItems;
+        e.CanExecute = items.OfType<IResultData>()
+                            .Any(static x => x.RawValue is FileSystemInfo);
+    }
+    private void OnOpenInFilesTreeWindow(object sender, ExecutedRoutedEventArgs e)
+    {
+        var items = Root.SelectedItems;
+        var fileInfos = items.OfType<IResultData>()
+                             .Select(x => x.RawValue)
+                             .OfType<FileSystemInfo>()
+                             .ToArray();
+        var resultList = ResultList.BuildAsFilesTree(fileInfos);
         var win = new ObjectsViewWindow(resultList);
         win.Show();
     }
