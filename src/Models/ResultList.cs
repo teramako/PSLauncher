@@ -207,24 +207,7 @@ public class ResultList : INotifyPropertyChanged
         }
         else if (isFileSystemInfo)
         {
-            var fileInfos = objects.OfType<FileSystemInfo>();
-            Dictionary<string, List<FileSystemInfo>> childrenMap = [];
-            foreach (var fsInfo in fileInfos)
-            {
-                var parentPath = Path.GetDirectoryName(fsInfo.FullName) ?? string.Empty;
-                if (childrenMap.TryGetValue(parentPath, out var list))
-                    list.Add(fsInfo);
-                else
-                    childrenMap[parentPath] = [fsInfo];
-            }
-            int index = 0;
-            return new ResultList
-            {
-                RootObject = psObjects,
-                Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
-                Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
-                Kind = ResultDataKind.Files,
-            };
+            return BuildAsFilesTree(objects.OfType<FileSystemInfo>());
         }
 
         return new ResultList
@@ -233,6 +216,30 @@ public class ResultList : INotifyPropertyChanged
             Items = [.. BuildExpandedItems(new ResultData("Results", psObjects, ObjectNodeType.VirtualRow))],
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
             Kind = ResultDataKind.Objects,
+        };
+    }
+
+    public static ResultList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
+    {
+        int itemCount = 0;
+        Dictionary<string, List<FileSystemInfo>> childrenMap = [];
+        foreach (var fsInfo in fileSystemInfos)
+        {
+            var parentPath = Path.GetDirectoryName(fsInfo.FullName) ?? string.Empty;
+            if (childrenMap.TryGetValue(parentPath, out var list))
+                list.Add(fsInfo);
+            else
+                childrenMap[parentPath] = [fsInfo];
+
+            itemCount++;
+        }
+        int index = 0;
+        return new ResultList
+        {
+            RootObject = fileSystemInfos,
+            Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
+            Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
+            Kind = ResultDataKind.Files,
         };
     }
 
