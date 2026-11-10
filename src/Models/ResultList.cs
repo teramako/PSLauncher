@@ -184,13 +184,15 @@ public class ResultList : INotifyPropertyChanged
         }
 
         List<object?> objects = [];
-        bool isString = false;
-        bool isFileSystemInfo = false;
+        bool isString = true;
+        bool isFileSystemInfo = true;
         await foreach (var obj in NormalizePSObjects(psObjects, cancellationToken))
         {
             objects.Add(obj);
-            isString = obj is string;
-            isFileSystemInfo = obj is FileSystemInfo;
+            if (isString)
+                isString = obj is string;
+            if (isFileSystemInfo)
+                isFileSystemInfo = obj is FileSystemInfo;
         }
         if (isString)
         {
