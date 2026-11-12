@@ -6,4 +6,5 @@ public enum ResultDataKind
     Simple = 1,
     Objects = 2,
     Files = 3,
+    Table = 4,
 }
