@@ -32,8 +32,10 @@ public partial class MainWindow
 
                 items.Add(item.RawValue);
 
-                if (item.DataType != typeof(void))
-                    types.Add(item.DataType);
+                if (Utils.GetDataType(item.RawValue) is Type t)
+                {
+                    types.Add(t);
+                }
             }
 
             if (items.Count == 0)

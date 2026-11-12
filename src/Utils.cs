@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Management.Automation;
 using System.Text;
 
@@ -217,6 +219,28 @@ public static class Utils
         {
             StringBuilderPool.Return(sb);
         }
+    }
+
+    [return: NotNullIfNotNull(nameof(value))]
+    public static Type? GetDataType(object? value)
+    {
+        return value switch
+        {
+            null => null,
+            string => typeof(string),
+            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal
+                => typeof(ValueType),
+            bool => typeof(ValueType),
+            Enum => typeof(ValueType),
+            Array => typeof(Array),
+            PSObject => typeof(PSObject),
+            IDictionary => typeof(IDictionary),
+            ICollection => typeof(ICollection),
+            Exception => typeof(Exception),
+            FileInfo => typeof(FileSystemInfo),
+            DirectoryInfo => typeof(FileSystemInfo),
+            _ => value.GetType()
+        };
     }
 
     /// <summary>
