@@ -232,13 +232,18 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
     private void OnCanCopyValue(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = Root.SelectedItems.OfType<IResultData>().Any(item => item.ValueType switch
+        e.CanExecute = Root.SelectedItems.OfType<object?>().Any(x => x switch
         {
-            ObjectValueType.Null => false,
-            ObjectValueType.String or ObjectValueType.Number or ObjectValueType.Boolean
-            or ObjectValueType.Enum or ObjectValueType.Temporal or ObjectValueType.Exception
-            or ObjectValueType.File or ObjectValueType.Directory => true,
-            _ => !string.IsNullOrEmpty(Utils.ObjectToString(item.RawValue))
+            null => false,
+            IResultData item => item.ValueType switch
+            {
+                ObjectValueType.Null => false,
+                ObjectValueType.String or ObjectValueType.Number or ObjectValueType.Boolean
+                or ObjectValueType.Enum or ObjectValueType.Temporal or ObjectValueType.Exception
+                or ObjectValueType.File or ObjectValueType.Directory => true,
+                _ => !string.IsNullOrEmpty(Utils.ObjectToString(item.RawValue))
+            },
+            _ => true
         });
         e.Handled = true;
     }
@@ -247,24 +252,38 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
     {
         StringCollection files = [];
         List<string> texts = [];
-        foreach (var item in Root.SelectedItems.OfType<IResultData>())
+        foreach (var obj in Root.SelectedItems)
         {
             e.Handled = true;
-            switch (item.ValueType)
+            switch (obj)
             {
-                case ObjectValueType.File or ObjectValueType.Directory:
-                    var filePath= $"{item.RawValue}";
-                    files.Add(filePath);
-                    texts.Add(filePath);
+                case IResultData item:
+                    switch (item.ValueType)
+                    {
+                        case ObjectValueType.File or ObjectValueType.Directory:
+                            AddAsFileSystem(item.RawValue);
+                            break;
+                        case ObjectValueType.String or ObjectValueType.Number:
+                        case ObjectValueType.Boolean or ObjectValueType.Enum:
+                        case ObjectValueType.Temporal or ObjectValueType.Exception:
+                            texts.Add($"{item.RawValue}");
+                            break;
+                        default:
+                            AddAsText(item.RawValue);
+                            break;
+                    }
                     break;
-                case ObjectValueType.String or ObjectValueType.Number:
-                case ObjectValueType.Boolean or ObjectValueType.Enum:
-                case ObjectValueType.Temporal or ObjectValueType.Exception:
-                    texts.Add($"{item.RawValue}");
+                case ValueData valueData:
+                    if (valueData.Value is FileSystemInfo)
+                        AddAsFileSystem(valueData.Value);
+                    else
+                        AddAsText(valueData.Value);
+                    break;
+                case FileSystemInfo fileSystemInfo:
+                    AddAsFileSystem(fileSystemInfo);
                     break;
                 default:
-                    var text = Utils.ObjectToString(item.RawValue);
-                    texts.Add(text);
+                    AddAsText(obj);
                     break;
             }
         }
@@ -274,6 +293,20 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         if (texts.Count > 0)
             data.SetText(string.Join(Environment.NewLine, texts));
         Clipboard.SetDataObject(data, true);
+
+        void AddAsFileSystem(object? fileSystemInfo)
+        {
+            if (fileSystemInfo is null)
+                return;
+            var filePath = $"{fileSystemInfo}";
+            files.Add(filePath);
+            texts.Add(filePath);
+        }
+        void AddAsText(object? obj)
+        {
+            var text = Utils.ObjectToString(obj);
+            texts.Add(text);
+        }
     }
     private void OnCanCopyRow(object sender, CanExecuteRoutedEventArgs e)
     {
