@@ -11,7 +11,7 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultList : INotifyPropertyChanged
+public class ResultList : IResultList, INotifyPropertyChanged
 {
     public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
@@ -19,6 +19,7 @@ public class ResultList : INotifyPropertyChanged
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
     public ResultDataKind Kind { get; init; }
     public ObservableCollection<IResultData> Items { get; init; } = [];
+    ICollection IResultList.Items => Items;
 
     /// <summary>
     /// Count of root items
