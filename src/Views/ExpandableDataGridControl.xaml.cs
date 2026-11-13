@@ -47,6 +47,7 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         if (DataContext is not TableList tableList)
             return;
 
+        e.Column.SortMemberPath = e.PropertyName;
         var dataType = tableList.DataType;
         if (PSObjectsMembers.TryGetColumns(dataType, out var columnDict))
         {
@@ -316,10 +317,20 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
     private void OnCopyRow(object sender, ExecutedRoutedEventArgs e)
     {
-        var items = Root.SelectedItems.OfType<IResultData>();
-        var columns = Root.Columns.Where(col => col.Visibility == Visibility.Visible).OrderBy(col => col.DisplayIndex);
-        var text = string.Join(Environment.NewLine,
-                               items.Select(item => string.Join("\t", columns.Select(col => item.GetColumnValue(col.SortMemberPath)))));
+        var items = Root.SelectedItems;
+        var columns = Root.Columns.Where(col => col.Visibility == Visibility.Visible)
+                                  .OrderBy(col => col.DisplayIndex)
+                                  .ToArray();
+        List<string> lines = [];
+        foreach (var item in items)
+        {
+            var line = item is IResultData data
+                ? string.Join("\t", columns.Select(col => data.GetColumnValue(col.SortMemberPath)))
+                : string.Join("\t", columns.Select(col => $"{item.GetType().GetProperty(col.SortMemberPath)?.GetValue(item)}"));
+            lines.Add(line);
+        }
+
+        var text = string.Join(Environment.NewLine, lines);
         if (!string.IsNullOrEmpty(text))
         {
             Clipboard.SetText(text);
