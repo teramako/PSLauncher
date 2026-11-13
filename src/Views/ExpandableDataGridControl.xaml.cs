@@ -434,17 +434,39 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
     #region OpenInFilesTreeWindow command handlers
     private void OnCanOpenInFilesTreeWindow(object sender, CanExecuteRoutedEventArgs e)
     {
-        var items = Root.SelectedItems;
-        e.CanExecute = items.OfType<IResultData>()
-                            .Any(static x => x.RawValue is FileSystemInfo);
+        foreach (var item in Root.SelectedItems)
+        {
+            if (item is FileSystemInfo
+                     or ValueData { Value: FileSystemInfo }
+                     or IResultData { RawValue: FileSystemInfo })
+            {
+                e.CanExecute = true;
+                return;
+            }
+        }
+        e.CanExecute = false;
     }
     private void OnOpenInFilesTreeWindow(object sender, ExecutedRoutedEventArgs e)
     {
-        var items = Root.SelectedItems;
-        var fileInfos = items.OfType<IResultData>()
-                             .Select(x => x.RawValue)
-                             .OfType<FileSystemInfo>()
-                             .ToArray();
+        List<FileSystemInfo> fileInfos = [];
+        foreach (var item in Root.SelectedItems)
+        {
+            switch (item)
+            {
+                case FileSystemInfo fs:
+                    fileInfos.Add(fs);
+                    break;
+                case ValueData { Value: FileSystemInfo fs }:
+                    fileInfos.Add(fs);
+                    break;
+                case IResultData { RawValue: FileSystemInfo fs }:
+                    fileInfos.Add(fs);
+                    break;
+            }
+        }
+        if (fileInfos.Count == 0)
+            return;
+
         var resultList = ResultList.BuildAsFilesTree(fileInfos);
         var win = new ObjectsViewWindow(resultList);
         win.Show();

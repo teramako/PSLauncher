@@ -115,6 +115,8 @@
             <Separator/>
             <MenuItem Header="Open in Objects Tree Window"
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
         </ContextMenu>
     </UserControl.Resources>
 
