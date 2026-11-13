@@ -369,14 +369,19 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
 
         if (items.Count == 1)
         {
-            e.CanExecute = items[0] is IResultData data && data switch
+            e.CanExecute = items[0] switch
             {
-                { RawValue: null } => false,
-                { ValueType: ObjectValueType.Null } => false,
-                { ValueType: ObjectValueType.Boolean } => false,
-                { ValueType: ObjectValueType.Number } => false,
-                { ValueType: ObjectValueType.Enum } => false,
-                { ValueType: ObjectValueType.String } => false,
+                null => false,
+                IResultData data => data switch
+                {
+                    { RawValue: null } => false,
+                    { ValueType: ObjectValueType.Null } => false,
+                    { ValueType: ObjectValueType.Boolean } => false,
+                    { ValueType: ObjectValueType.Number } => false,
+                    { ValueType: ObjectValueType.Enum } => false,
+                    { ValueType: ObjectValueType.String } => false,
+                    _ => true
+                },
                 _ => true
             };
         }
@@ -393,17 +398,29 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
             return;
         if (items.Count == 1)
         {
-            if (items[0] is not IResultData data || data.RawValue is null || data.ValueType is ObjectValueType.Null)
+            var item = items[0];
+            if (item is null)
                 return;
+            if (item is IResultData data)
+            {
+                if (data.RawValue is null || data.ValueType is ObjectValueType.Null)
+                    return;
 
-            resultList = ResultList.Build(data.RawValue, ResultDataKind.Objects);
+                resultList = ResultList.Build(data.RawValue, ResultDataKind.Objects);
+            }
+            else
+            {
+                resultList = ResultList.Build(item, ResultDataKind.Objects);
+            }
         }
         else
         {
-            var list = items.OfType<IResultData>()
-                            .Where(static x => x.ValueType is not ObjectValueType.Null)
-                            .Select(static x => x.RawValue)
-                            .ToArray();
+            var list = DataContext is ResultList
+                       ? items.OfType<IResultData>()
+                              .Where(static x => x.ValueType is not ObjectValueType.Null)
+                              .Select(static x => x.RawValue)
+                              .ToArray()
+                       : [.. items];
             if (list.Length == 0)
                 return;
             resultList = ResultList.Build(list, ResultDataKind.Objects);

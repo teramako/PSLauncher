@@ -112,6 +112,9 @@
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
                       Command="main:Commands.PinItem"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
         </ContextMenu>
     </UserControl.Resources>
 
