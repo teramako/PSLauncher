@@ -332,6 +332,31 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         }
     }
 
+    #region PinItem command handlers
+    private void CanPinItem(object sender, CanExecuteRoutedEventArgs e)
+    {
+        var items = Root.SelectedItems;
+        if (items.Count == 0)
+        {
+            e.CanExecute = false;
+            return;
+        }
+
+        e.CanExecute = items.OfType<object>().Any(static item =>
+        {
+            return item is not IResultData data
+                   || data is not { RawValue: null } and not { NodeType: ObjectNodeType.VirtualRow };
+        });
+    }
+    private void PinItem(object sender, ExecutedRoutedEventArgs e)
+    {
+        if (App.Current?.MainWindow is not MainWindow mainWindow)
+            return;
+
+        mainWindow.PinItems(Root.SelectedItems);
+    }
+    #endregion
+
     #region OpenInObjectsTreeWindow command handlers
     private void OnCanOpenInObjectsTreeWindow(object sender, CanExecuteRoutedEventArgs e)
     {

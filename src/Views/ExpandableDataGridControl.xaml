@@ -75,7 +75,7 @@
             <MenuItem Header="Copy Row"
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
-                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
+                      Command="main:Commands.PinItem"/>
             <Separator/>
             <MenuItem Header="Open in Objects Tree Window"
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
@@ -93,7 +93,7 @@
             <MenuItem Header="Copy Row"
                       Command="main:Commands.CopyRow"/>
             <MenuItem Header="Pin"
-                      Command="main:Commands.PinItem" CommandParameter="{Binding SelectedItems}"/>
+                      Command="main:Commands.PinItem"/>
             <Separator/>
             <MenuItem Header="Open in Objects Tree Window"
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
@@ -110,6 +110,8 @@
                       Command="ApplicationCommands.Copy"/>
             <MenuItem Header="Copy Row"
                       Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem"/>
         </ContextMenu>
     </UserControl.Resources>
 
@@ -132,6 +134,7 @@
         <DataGrid.CommandBindings>
             <CommandBinding Command="ApplicationCommands.Copy" Executed="OnCopyValue" PreviewCanExecute="OnCanCopyValue"/>
             <CommandBinding Command="{x:Static main:Commands.CopyRow}" Executed="OnCopyRow" PreviewCanExecute="OnCanCopyRow"/>
+            <CommandBinding Command="{x:Static main:Commands.PinItem}" Executed="PinItem" CanExecute="CanPinItem"/>
             <CommandBinding Command="{x:Static main:Commands.OpenInObjectsTreeWindow}" Executed="OnOpenInObjectsTreeWindow" CanExecute="OnCanOpenInObjectsTreeWindow"/>
             <CommandBinding Command="{x:Static main:Commands.OpenInFilesTreeWindow}" Executed="OnOpenInFilesTreeWindow" CanExecute="OnCanOpenInFilesTreeWindow"/>
             <CommandBinding Command="{x:Static main:Commands.OpenInTableViewWindow}" Executed="OnOpenInTableViewWindow" CanExecute="OnCanOpenInTableViewWindow"/>

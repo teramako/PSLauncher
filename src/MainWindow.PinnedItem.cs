@@ -14,73 +14,64 @@ public partial class MainWindow
         data.UpdateItems();
     }
 
-    private void PinItem(object sender, ExecutedRoutedEventArgs e)
+    public void PinItem(object pinItem)
     {
+        PinnedItem.DataContext = new PinnedItem(pinItem);
+
+        RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", pinItem);
+    }
+
+    public void PinItems(IList selectedItems)
+    {
+        if (selectedItems.Count == 0)
+            return;
+
         object pinItem;
-        if (e.Parameter is IResultData { RawValue: not null } data)
+        List<object> items = [];
+        HashSet<Type> types = [];
+        foreach (var obj in selectedItems)
         {
-            pinItem = data.RawValue;
-        }
-        else if (e.Parameter is IList { Count: > 0 } list)
-        {
-            List<object> items = [];
-            HashSet<Type> types = [];
-            foreach (var item in list.OfType<IResultData>())
+            var item = obj;
+            if (obj is IResultData data)
             {
-                if (item is { NodeType: ObjectNodeType.VirtualRow } or { RawValue: null })
+                if (data is { NodeType: ObjectNodeType.VirtualRow } or { RawValue: null })
                     continue;
-
-                items.Add(item.RawValue);
-
-                if (Utils.GetDataType(item.RawValue) is Type t)
-                {
-                    types.Add(t);
-                }
+                item = data.RawValue;
             }
 
-            if (items.Count == 0)
-                return;
-            if (items.Count == 1)
+            items.Add(item);
+            if (Utils.GetDataType(item) is Type t)
             {
-                pinItem = items[0];
+                types.Add(t);
             }
-            else
-            {
-                if (types.Count == 1)
-                {
-                    var t = types.First();
-                    var typedArray = Array.CreateInstance(t, items.Count);
-                    for (int i = 0; i < items.Count; i++)
-                    {
-                        typedArray.SetValue(items[i], i);
-                    }
-                    pinItem = typedArray;
-                }
-                else
-                {
-                    pinItem = items.ToArray();
-                }
-            }
+        }
+
+        if (items.Count == 0)
+            return;
+        if (items.Count == 1)
+        {
+            pinItem = items[0];
         }
         else
         {
-            return;
+            if (types.Count == 1)
+            {
+                var t = types.First();
+                var typedArray = Array.CreateInstance(t, items.Count);
+                for (int i = 0; i < items.Count; i++)
+                {
+                    typedArray.SetValue(items[i], i);
+                }
+                pinItem = typedArray;
+            }
+            else
+            {
+                pinItem = items.ToArray();
+            }
         }
 
         PinnedItem.DataContext = new PinnedItem(pinItem);
         RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", pinItem);
-    }
-    private void CanPinItem(object sender, CanExecuteRoutedEventArgs e)
-    {
-        e.CanExecute = e.Parameter switch
-        {
-            IResultData data => data is not { RawValue: null } and
-                                        not { NodeType: ObjectNodeType.VirtualRow },
-            IList list => list.OfType<IResultData>()
-                              .Any(x => x is not { RawValue: null } and
-                                             not { NodeType: ObjectNodeType.VirtualRow }),
-            _ => false,
-        };
     }
 
     private void UnpinItem(object sender, ExecutedRoutedEventArgs e)
