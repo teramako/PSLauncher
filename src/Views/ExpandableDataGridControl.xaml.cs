@@ -33,11 +33,12 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
                                 : Visibility.Visible;
                 Root.AutoGenerateColumns = false;
                 ChangeColumns(newList, e.OldValue as ResultList);
-                SetContextMenu(newList);
+                SetContextMenu(newList.Kind);
                 break;
-            case TableList:
+            case TableList tableList:
                 Root.Visibility = Visibility.Visible;
                 Root.AutoGenerateColumns = true;
+                SetContextMenu(tableList.Kind);
                 break;
         }
     }
@@ -121,22 +122,15 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         Root.Columns.Clear();
         columns.ForEach(Root.Columns.Add);
     }
-    private void SetContextMenu(ResultList? dataList)
+    private void SetContextMenu(ResultDataKind kind)
     {
-        if (dataList is null)
-            return;
-        switch (dataList.Kind)
+        Root.ContextMenu = kind switch
         {
-            case ResultDataKind.Objects:
-                Root.ContextMenu = TryFindResource("ObjectsContextMenu") as ContextMenu;
-                break;
-            case ResultDataKind.Files:
-                Root.ContextMenu = TryFindResource("FilesContextMenu") as ContextMenu;
-                break;
-            default:
-                Root.ContextMenu = null;
-                break;
-        }
+            ResultDataKind.Objects => TryFindResource("ObjectsContextMenu") as ContextMenu,
+            ResultDataKind.Files => TryFindResource("FilesContextMenu") as ContextMenu,
+            ResultDataKind.Table => TryFindResource("TableContextMenu") as ContextMenu,
+            _ => null,
+        };
     }
 
     private void OnGotFocus(object sender, RoutedEventArgs e)

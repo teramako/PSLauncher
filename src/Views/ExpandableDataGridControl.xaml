@@ -102,6 +102,15 @@
             <MenuItem Header="Open in Table View Window"
                       Command="{x:Static main:Commands.OpenInTableViewWindow}"/>
         </ContextMenu>
+        <!-- Context Menu for Table view -->
+        <ContextMenu x:Key="TableContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+        </ContextMenu>
     </UserControl.Resources>
 
     <DataGrid x:Name="Root"
