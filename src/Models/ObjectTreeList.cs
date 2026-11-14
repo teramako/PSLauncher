@@ -11,15 +11,15 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultList : IResultList, INotifyPropertyChanged
+public class ObjectTreeList : IObjectList, INotifyPropertyChanged
 {
     public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
     public string DisplayData { get; init; } = string.Empty;
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
     public ResultDataKind Kind { get; init; }
-    public ObservableCollection<IResultData> Items { get; init; } = [];
-    ICollection IResultList.Items => Items;
+    public ObservableCollection<ITreeItem> Items { get; init; } = [];
+    ICollection IObjectList.Items => Items;
 
     /// <summary>
     /// Count of root items
@@ -43,7 +43,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void Append(IResultData data)
+    public void Append(ITreeItem data)
     {
         Items.Add(data);
         Count += 1;
@@ -52,7 +52,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
     public void Append(object? data)
     {
         var c = Count;
-        Items.Add(new ResultData(c, data));
+        Items.Add(new ObjectTreeItem(c, data));
         Count = c + 1;
     }
 
@@ -77,9 +77,9 @@ public class ResultList : IResultList, INotifyPropertyChanged
             return;
         var parentLevel = parentRow.Level;
         bool hasChildren = false;
-        IEnumerable<IResultData> children = Sorter.Sorter is not null
-                                            ? Sorter.Sorter(parentRow.GetChildren(), Sorter.Ascending)
-                                            : parentRow.GetChildren();
+        IEnumerable<ITreeItem> children = Sorter.Sorter is not null
+                                          ? Sorter.Sorter(parentRow.GetChildren(), Sorter.Ascending)
+                                          : parentRow.GetChildren();
         foreach (var child in children)
         {
             Items.Insert(++index, child);
@@ -167,12 +167,12 @@ public class ResultList : IResultList, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
+    /// Build <seealso cref="ObjectTreeList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
     /// </summary>
     /// <param name="psObjects"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static async Task<ResultList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
+    public static async Task<ObjectTreeList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
     {
         int itemCount = psObjects.Count;
         if (itemCount == 0)
@@ -198,7 +198,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
         if (isString)
         {
             var strings = objects.OfType<string>();
-            return new ResultList
+            return new ObjectTreeList
             {
                 RootObject = psObjects,
                 Description = itemCount > 1 ? $"String {{ Count = {itemCount} }}" : "String",
@@ -211,16 +211,16 @@ public class ResultList : IResultList, INotifyPropertyChanged
             return BuildAsFilesTree(objects.OfType<FileSystemInfo>());
         }
 
-        return new ResultList
+        return new ObjectTreeList
         {
             RootObject = psObjects,
-            Items = [.. BuildExpandedItems(new ResultData("Results", psObjects, ObjectNodeType.VirtualRow))],
+            Items = [.. BuildExpandedItems(new ObjectTreeItem("Results", psObjects, ObjectNodeType.VirtualRow))],
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
             Kind = ResultDataKind.Objects,
         };
     }
 
-    public static ResultList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
+    public static ObjectTreeList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
     {
         int itemCount = 0;
         Dictionary<string, List<FileSystemInfo>> childrenMap = [];
@@ -235,21 +235,21 @@ public class ResultList : IResultList, INotifyPropertyChanged
             itemCount++;
         }
         int index = 0;
-        return new ResultList
+        return new ObjectTreeList
         {
             RootObject = fileSystemInfos,
-            Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
+            Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileTreeItem(kv.Key, kv.Value, index++)))],
             Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
             Kind = ResultDataKind.Files,
         };
     }
 
-    private (Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>? Sorter, bool Ascending) Sorter = (null, true);
+    private (Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>? Sorter, bool Ascending) Sorter = (null, true);
 
     public bool Sort(ListSortDirection? sortDirection, string colName = "Name")
     {
         Sorter = (null, false);
-        List<IResultData> results;
+        List<ITreeItem> results;
         if (sortDirection is null)
         {
             results = [.. SortTreeItems(Items, x => x.Index)];
@@ -263,14 +263,14 @@ public class ResultList : IResultList, INotifyPropertyChanged
                 case ResultDataKind.Simple:
                     return false;
                 case ResultDataKind.Files:
-                    if (!FileResultData.Sorters.TryGetValue(colName, out var fileSorter))
+                    if (!FileTreeItem.Sorters.TryGetValue(colName, out var fileSorter))
                         return false;
                     results = [.. fileSorter(Items, ascending)];
                     Sorter = (fileSorter, ascending);
                     break;
                 case ResultDataKind.Objects:
                 default:
-                    if (!ResultData.Sorters.TryGetValue(colName, out var sorter))
+                    if (!ObjectTreeItem.Sorters.TryGetValue(colName, out var sorter))
                         return false;
                     results = [.. sorter(Items, ascending)];
                     Sorter = (sorter, ascending);
@@ -283,11 +283,11 @@ public class ResultList : IResultList, INotifyPropertyChanged
         return true;
     }
 
-    private static Dictionary<IResultData, List<T>> BuildChildrenMap<T>(IEnumerable<T> originalItems, out List<T> rootItems)
-        where T : IResultData
+    private static Dictionary<ITreeItem, List<T>> BuildChildrenMap<T>(IEnumerable<T> originalItems, out List<T> rootItems)
+        where T : ITreeItem
     {
         rootItems = [];
-        Dictionary<IResultData, List<T>> childrenMap = [];
+        Dictionary<ITreeItem, List<T>> childrenMap = [];
         foreach (var item in originalItems)
         {
             if (item.Parent is null)
@@ -306,8 +306,8 @@ public class ResultList : IResultList, INotifyPropertyChanged
         }
         return childrenMap;
     }
-    private static IEnumerable<T> EnumerateTreeItems<T>(IEnumerable<T> items, Dictionary<IResultData, List<T>> childrenMap)
-        where T : IResultData
+    private static IEnumerable<T> EnumerateTreeItems<T>(IEnumerable<T> items, Dictionary<ITreeItem, List<T>> childrenMap)
+        where T : ITreeItem
     {
         foreach (var item in items)
         {
@@ -322,7 +322,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
     public static IEnumerable<T> SortTreeItems<T, TKey>(IEnumerable<T> originalItems,
                                                         Func<T, TKey> keySelector,
                                                         bool ascending = true)
-        where T : IResultData
+        where T : ITreeItem
     {
         var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
         foreach (var kv in childrenMap)
@@ -340,13 +340,13 @@ public class ResultList : IResultList, INotifyPropertyChanged
     public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
                                                   Comparison<T> comparison,
                                                   bool ascending = true)
-        where T : IResultData
+        where T : ITreeItem
     {
         return SortTreeItems(originalItems, Comparer<T>.Create(ascending ? comparison : (x, y) => comparison(y, x)));
     }
     public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
                                                   IComparer<T> comparer)
-        where T : IResultData
+        where T : ITreeItem
     {
         var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
         foreach (var kv in childrenMap)
@@ -357,20 +357,20 @@ public class ResultList : IResultList, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from a single <seealso cref="PSObject"/>
+    /// Build <seealso cref="ObjectTreeList"/> instance from a single <seealso cref="PSObject"/>
     /// </summary>
     /// <param name="psObject"></param>
     /// <returns></returns>
     [return: NotNullIfNotNull(nameof(psObject))]
-    public static ResultList? Build(PSObject? psObject) => Build(Utils.GetBaseObject(psObject));
+    public static ObjectTreeList? Build(PSObject? psObject) => Build(Utils.GetBaseObject(psObject));
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from an object.
+    /// Build <seealso cref="ObjectTreeList"/> instance from an object.
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
     [return: NotNullIfNotNull(nameof(obj))]
-    public static ResultList? Build(object? obj, ResultDataKind kind = ResultDataKind.NotSpecified)
+    public static ObjectTreeList? Build(object? obj, ResultDataKind kind = ResultDataKind.NotSpecified)
     {
         if (obj is null)
         {
@@ -379,114 +379,114 @@ public class ResultList : IResultList, INotifyPropertyChanged
         var baseType = Utils.GetTypeName(obj.GetType());
         return obj switch
         {
-            string str => new ResultList
+            string str => new ObjectTreeList
             {
                 RootObject = str,
                 Kind = ResultDataKind.Simple,
                 Description = baseType,
                 DisplayData = str
             },
-            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool => new ResultList
+            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = baseType,
                 DisplayData = $"{obj}"
             },
-            Enum enumVal => new ResultList
+            Enum enumVal => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"Enum({baseType}) {enumVal:G} (0x{enumVal:X})",
                 DisplayData = $"{enumVal}"
             },
-            SecureString secureString => new ResultList
+            SecureString secureString => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"SecureString",
                 DisplayData = $"{secureString}"
             },
-            PSCredential credential => new ResultList
+            PSCredential credential => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"PSCredential [{credential.UserName}]",
                 DisplayData = $"{credential}"
             },
-            PSObject pso => new ResultList
+            PSObject pso => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("PSObject", pso, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
             },
-            FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ResultList
+            FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
             },
-            FileSystemInfo fileSystemInfo => new ResultList
+            FileSystemInfo fileSystemInfo => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new FileResultData(fileSystemInfo))],
+                Items = [.. BuildExpandedItems(new FileTreeItem(fileSystemInfo))],
                 Kind = ResultDataKind.Files,
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
             },
-            Array array => new ResultList
+            Array array => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Array", array, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
-            IDictionary dictionary => new ResultList
+            IDictionary dictionary => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
-            ICollection collection => new ResultList
+            ICollection collection => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Collection", collection, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
-            Exception ex => new ResultList
+            Exception ex => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Exception", ex, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
             },
-            _ => new ResultList
+            _ => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem(baseType, obj, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = Utils.ObjectToString(obj)
             },
         };
     }
-    private static IEnumerable<IResultData> BuildExpandedItems(IResultData parentRow)
+    private static IEnumerable<ITreeItem> BuildExpandedItems(ITreeItem parentTreeItem)
     {
-        yield return parentRow;
+        yield return parentTreeItem;
         bool hasChildren = false;
-        foreach (var item in parentRow.GetChildren())
+        foreach (var item in parentTreeItem.GetChildren())
         {
             hasChildren = true;
             yield return item;
         }
-        parentRow.IsExpaned = hasChildren;
+        parentTreeItem.IsExpaned = hasChildren;
     }
 
     private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,

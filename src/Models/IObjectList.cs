@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace PSLauncher.Models;
 
-public interface IResultList
+public interface IObjectList
 {
     string Description { get; }
     object? RootObject { get; }

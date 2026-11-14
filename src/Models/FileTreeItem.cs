@@ -5,25 +5,25 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<FileResultData>
+public class FileTreeItem : INotifyPropertyChanged, ITreeItem, IResultData<FileTreeItem>
 {
     private readonly FileSystemInfo? file;
     private readonly ReadOnlyCollection<FileSystemInfo>? children;
 
-    public FileResultData(FileSystemInfo file, int index = 0)
+    public FileTreeItem(FileSystemInfo file, int index = 0)
         : this(file.Name, file.FullName, file is FileInfo f ? f.Length : null, file.LastWriteTime, file.Attributes.HasFlag(FileAttributes.Directory), index)
     {
         this.file = file;
         HasChildren = IsDirectory = file.Attributes.HasFlag(FileAttributes.Directory);
     }
-    public FileResultData(string name, IList<FileSystemInfo> children, int index = 0)
+    public FileTreeItem(string name, IList<FileSystemInfo> children, int index = 0)
         : this(name, string.Empty, null, null, true, index)
     {
         Name = name;
         this.children = children.AsReadOnly();
         NodeType = ObjectNodeType.VirtualRow;
     }
-    public FileResultData(string name, string fullName, long? size, DateTime? lastWriteTime, bool isDirectory, int index = 0)
+    public FileTreeItem(string name, string fullName, long? size, DateTime? lastWriteTime, bool isDirectory, int index = 0)
     {
         Name = name;
         FullName = fullName;
@@ -35,7 +35,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
     }
 
     public int Index { get; }
-    public IResultData? Parent { get; private set; }
+    public ITreeItem? Parent { get; private set; }
     public object? RawValue => file;
     public string Name { get; }
     public ImageSource? Icon => file is not null ? NativeMethods.GetIcon(file) : null;
@@ -60,7 +60,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
     public bool HasAvailableValue => file is not null;
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void SetParent(IResultData parent)
+    public void SetParent(ITreeItem parent)
     {
         Parent = parent;
         Level = parent.Level + 1;
@@ -74,13 +74,13 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
         _ => string.Empty
     };
 
-    public IEnumerable<IResultData> GetChildren()
+    public IEnumerable<ITreeItem> GetChildren()
     {
         if (children is not null)
         {
             for (int i = 0; i < children.Count; i++)
             {
-                var childData = new FileResultData(children[i], i);
+                var childData = new FileTreeItem(children[i], i);
                 childData.SetParent(this);
                 yield return childData;
             }
@@ -95,23 +95,23 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
         }
     }
 
-    public static IEnumerable<FileResultData> ExtractObject(IResultData data)
+    public static IEnumerable<FileTreeItem> ExtractObject(ITreeItem data)
     {
         return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];
     }
 
-    public static IEnumerable<FileResultData> ExtractObject(DirectoryInfo parentDir)
+    public static IEnumerable<FileTreeItem> ExtractObject(DirectoryInfo parentDir)
     {
         int index = 0;
         foreach (var file in parentDir.GetFileSystemInfos())
         {
-            var fileData = new FileResultData(file, index++);
+            var fileData = new FileTreeItem(file, index++);
             yield return fileData;
         }
     }
 
-    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
-        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+    public static Dictionary<string, Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>> Sorters { get; } = new() {
+        ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
             {
@@ -121,7 +121,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
             }
             return x.NodeType.CompareTo(y.NodeType);
         }, asc),
-        ["LastWriteTime"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.LastWriteTime, asc),
-        ["Size"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.Size, asc),
+        ["LastWriteTime"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileTreeItem>(), static x => x.LastWriteTime, asc),
+        ["Size"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileTreeItem>(), static x => x.Size, asc),
     };
 }

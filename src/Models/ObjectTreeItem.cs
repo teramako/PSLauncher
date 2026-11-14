@@ -7,10 +7,10 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultData : INotifyPropertyChanged, IResultData, IResultData<ResultData>
+public class ObjectTreeItem : INotifyPropertyChanged, ITreeItem, IResultData<ObjectTreeItem>
 {
     public int Index { get; }
-    public IResultData? Parent { get; private set; }
+    public ITreeItem? Parent { get; private set; }
     public string Name { get; set; }
     public string Type { get; set; }
     public string Value { get; set; } = string.Empty;
@@ -35,20 +35,20 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     public ExpandType ExpandType { get; } = ExpandType.Default;
     public bool HasAvailableValue => RawValue is not null && ValueType is not ObjectValueType.Null;
 
-    public ResultData(int index, object? rawValue)
+    public ObjectTreeItem(int index, object? rawValue)
         : this($"[{index}]", rawValue, ObjectNodeType.Index, index)
     {
     }
-    public ResultData(string name, object? rawValue, ObjectNodeType nodeType, int index = 0)
+    public ObjectTreeItem(string name, object? rawValue, ObjectNodeType nodeType, int index = 0)
         : this(name, rawValue, rawValue?.GetType() ?? typeof(void), nodeType, index)
     {
     }
-    public ResultData(string name, object? rawValue, int index, ExpandType expandType)
+    public ObjectTreeItem(string name, object? rawValue, int index, ExpandType expandType)
         : this(index, name, rawValue, string.Empty, string.Empty, ObjectNodeType.VirtualRow, ObjectValueType.Null, true)
     {
         ExpandType = expandType;
     }
-    public ResultData(string name, object? rawValue, Type? type, ObjectNodeType nodeType, int index)
+    public ObjectTreeItem(string name, object? rawValue, Type? type, ObjectNodeType nodeType, int index)
     {
         Index = index;
         Name = name;
@@ -57,7 +57,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         Type = type is null ? "(null)" : Utils.GetTypeName(type);
         (Value, HasChildren, ValueType) = ValueToString(rawValue);
     }
-    public ResultData(int index, string name, object? rawValue, string value, string type, ObjectNodeType nodeType, ObjectValueType valueType, bool hasChildren)
+    public ObjectTreeItem(int index, string name, object? rawValue, string value, string type, ObjectNodeType nodeType, ObjectValueType valueType, bool hasChildren)
     {
         Index = index;
         Name = name;
@@ -71,7 +71,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void SetParent(IResultData parent)
+    public void SetParent(ITreeItem parent)
     {
         Parent = parent;
         Level = parent.Level + 1;
@@ -85,7 +85,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         _ => string.Empty
     };
 
-    public IEnumerable<IResultData> GetChildren()
+    public IEnumerable<ITreeItem> GetChildren()
     {
         foreach (var child in ExtractObject(RawValue, ExpandType))
         {
@@ -118,7 +118,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         };
     }
 
-    public static IEnumerable<ResultData> ExtractObject(object? value, ExpandType expandType = ExpandType.Default)
+    public static IEnumerable<ObjectTreeItem> ExtractObject(object? value, ExpandType expandType = ExpandType.Default)
     {
         var obj = Utils.GetBaseObject(value);
         return obj switch
@@ -133,14 +133,14 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         };
     }
 
-    private static IEnumerable<ResultData> ExtractEnumerableObject(IEnumerable enumerable,
+    private static IEnumerable<ObjectTreeItem> ExtractEnumerableObject(IEnumerable enumerable,
                                                                    ExpandType expandType = ExpandType.Default)
     {
         int index = 0;
         switch (expandType)
         {
             case ExpandType.Default:
-                yield return new ResultData("Members", enumerable, -1, ExpandType.Members);
+                yield return new ObjectTreeItem("Members", enumerable, -1, ExpandType.Members);
                 foreach (var item in enumerable)
                 {
                     yield return new(index++, Utils.GetBaseObject(item));
@@ -153,7 +153,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         }
     }
 
-    private static IEnumerable<ResultData> ExtractArray(Array array)
+    private static IEnumerable<ObjectTreeItem> ExtractArray(Array array)
     {
         for (var i = 0; i < array.Length; i++)
         {
@@ -161,14 +161,14 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         }
     }
 
-    private static IEnumerable<ResultData> ExtractDictionaryObject(IDictionary dictionary,
-                                                                   ExpandType expandType = ExpandType.Default)
+    private static IEnumerable<ObjectTreeItem> ExtractDictionaryObject(IDictionary dictionary,
+                                                                       ExpandType expandType = ExpandType.Default)
     {
         int index = 0;
         switch (expandType)
         {
             case ExpandType.Default:
-                yield return new ResultData("Members", dictionary, -1, ExpandType.Members);
+                yield return new ObjectTreeItem("Members", dictionary, -1, ExpandType.Members);
                 foreach (DictionaryEntry entry in dictionary)
                 {
                     yield return new($"{entry.Key}", Utils.GetBaseObject(entry.Value), ObjectNodeType.Index, index++);
@@ -181,7 +181,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         }
     }
 
-    private static IEnumerable<ResultData> ExtractPSObject(PSObject pso)
+    private static IEnumerable<ObjectTreeItem> ExtractPSObject(PSObject pso)
     {
         int index = 0;
         foreach (var property in pso.Properties)
@@ -194,7 +194,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         }
     }
 
-    private static IEnumerable<ResultData> ExtractGenericObject(object obj)
+    private static IEnumerable<ObjectTreeItem> ExtractGenericObject(object obj)
     {
         int index = int.MinValue;
         var type = obj.GetType();
@@ -214,7 +214,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
             }
         }
 
-        ResultData CreatePropertyData(PropertyInfo property)
+        ObjectTreeItem CreatePropertyData(PropertyInfo property)
         {
             try
             {
@@ -226,7 +226,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
                 return new(property.Name, ex, property.PropertyType, ObjectNodeType.Property, index++);
             }
         }
-        ResultData CreateFieldData(FieldInfo field)
+        ObjectTreeItem CreateFieldData(FieldInfo field)
         {
             try
             {
@@ -240,8 +240,8 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
         }
     }
 
-    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
-        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+    public static Dictionary<string, Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>> Sorters { get; } = new() {
+        ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
             {
@@ -251,6 +251,6 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
             }
             return x.NodeType.CompareTo(y.NodeType);
         }, asc),
-        ["Type"] = (items, asc) => ResultList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
+        ["Type"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<ObjectTreeItem>(), static x => x.Type, asc),
     };
 }

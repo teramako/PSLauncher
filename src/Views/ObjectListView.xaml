@@ -1,4 +1,4 @@
-<UserControl x:Class="PSLauncher.Views.ExpandableDataGridControl"
+<UserControl x:Class="PSLauncher.Views.ObjectListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,11 +9,11 @@
              xmlns:converter="clr-namespace:PSLauncher.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance Type=model:ResultList}"
+             d:DataContext="{d:DesignInstance Type=model:ObjectTreeList}"
              DataContextChanged="OnDataContextChanged">
     <UserControl.Resources>
         <ControlTemplate x:Key="IconImage">
-            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileResultData}"/>
+            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileTreeItem}"/>
         </ControlTemplate>
         <!-- DataGrid columns for Object view -->
         <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name" IsReadOnly="True" CanUserReorder="False">

@@ -11,10 +11,10 @@ public partial class ObjectsViewWindow : Window
         InitializeComponent();
     }
 
-    public ObjectsViewWindow(IResultList resultList) : this()
+    public ObjectsViewWindow(IObjectList dataContext) : this()
     {
-        DataContext = resultList;
-        if (!string.IsNullOrEmpty(resultList.Description))
-            Title = $"Objects View - {resultList.Description}";
+        DataContext = dataContext;
+        if (!string.IsNullOrEmpty(dataContext.Description))
+            Title = $"Objects View - {dataContext.Description}";
     }
 }

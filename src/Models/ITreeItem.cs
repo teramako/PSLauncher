@@ -2,10 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PSLauncher.Models;
 
-public interface IResultData
+public interface ITreeItem
 {
     int Index { get; }
-    IResultData? Parent { get; }
+    ITreeItem? Parent { get; }
     string Name { get; }
     object? RawValue { get; }
     int Level { get; set; }
@@ -13,21 +13,21 @@ public interface IResultData
     bool IsExpaned { get; set; }
     ObjectNodeType NodeType { get; }
     ObjectValueType ValueType { get; }
-    void SetParent(IResultData parent);
+    void SetParent(ITreeItem parent);
     string GetColumnValue(string? columnName);
     /// <summary>
     /// Get child nodes
     /// </summary>
     /// <returns></returns>
-    IEnumerable<IResultData> GetChildren();
+    IEnumerable<ITreeItem> GetChildren();
     [MemberNotNullWhen(true, nameof(RawValue))]
     bool HasAvailableValue { get; }
 }
 
-public interface IResultData<T> : IResultData where T : IResultData
+public interface IResultData<T> : ITreeItem where T : ITreeItem
 {
     /// <summary>
     /// Sort functions by each column
     /// </summary>
-    static abstract Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; }
+    static abstract Dictionary<string, Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>> Sorters { get; }
 }
