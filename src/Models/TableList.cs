@@ -5,12 +5,12 @@ namespace PSLauncher.Models;
 /// <summary>
 /// Container for a table view.
 /// </summary>
-public class TableList : IResultList
+public class TableList : IObjectList
 {
     public required string Description { get; init; }
     public object? RootObject { get; init; }
     public required List<object?> Items { get; init; }
-    ICollection IResultList.Items => Items;
+    ICollection IObjectList.Items => Items;
     public int Count => Items.Count;
     public ResultDataKind Kind => ResultDataKind.Table;
     public required Type DataType { get; init; }
