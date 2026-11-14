@@ -117,6 +117,8 @@
                       Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
             <MenuItem Header="Open in Files Tree Window"
                       Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
+            <MenuItem Header="Open in Table View Window"
+                      Command="{x:Static main:Commands.OpenInTableViewWindow}"/>
         </ContextMenu>
     </UserControl.Resources>
 
