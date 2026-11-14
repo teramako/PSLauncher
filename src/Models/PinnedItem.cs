@@ -94,7 +94,7 @@ public class PinnedItem : ObjectTreeList
             Items.Clear();
         }
 
-        IEnumerable<IResultData> items = RootObject switch
+        IEnumerable<ITreeItem> items = RootObject switch
         {
             DirectoryInfo dir => FileTreeItem.ExtractObject(dir),
             FileInfo file => [new FileTreeItem(file, 0)],

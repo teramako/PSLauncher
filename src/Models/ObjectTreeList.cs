@@ -18,7 +18,7 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
     public string DisplayData { get; init; } = string.Empty;
     public bool HasDisplayData => !string.IsNullOrEmpty(DisplayData);
     public ResultDataKind Kind { get; init; }
-    public ObservableCollection<IResultData> Items { get; init; } = [];
+    public ObservableCollection<ITreeItem> Items { get; init; } = [];
     ICollection IObjectList.Items => Items;
 
     /// <summary>
@@ -43,7 +43,7 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void Append(IResultData data)
+    public void Append(ITreeItem data)
     {
         Items.Add(data);
         Count += 1;
@@ -77,9 +77,9 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
             return;
         var parentLevel = parentRow.Level;
         bool hasChildren = false;
-        IEnumerable<IResultData> children = Sorter.Sorter is not null
-                                            ? Sorter.Sorter(parentRow.GetChildren(), Sorter.Ascending)
-                                            : parentRow.GetChildren();
+        IEnumerable<ITreeItem> children = Sorter.Sorter is not null
+                                          ? Sorter.Sorter(parentRow.GetChildren(), Sorter.Ascending)
+                                          : parentRow.GetChildren();
         foreach (var child in children)
         {
             Items.Insert(++index, child);
@@ -244,12 +244,12 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
         };
     }
 
-    private (Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>? Sorter, bool Ascending) Sorter = (null, true);
+    private (Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>? Sorter, bool Ascending) Sorter = (null, true);
 
     public bool Sort(ListSortDirection? sortDirection, string colName = "Name")
     {
         Sorter = (null, false);
-        List<IResultData> results;
+        List<ITreeItem> results;
         if (sortDirection is null)
         {
             results = [.. SortTreeItems(Items, x => x.Index)];
@@ -283,11 +283,11 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
         return true;
     }
 
-    private static Dictionary<IResultData, List<T>> BuildChildrenMap<T>(IEnumerable<T> originalItems, out List<T> rootItems)
-        where T : IResultData
+    private static Dictionary<ITreeItem, List<T>> BuildChildrenMap<T>(IEnumerable<T> originalItems, out List<T> rootItems)
+        where T : ITreeItem
     {
         rootItems = [];
-        Dictionary<IResultData, List<T>> childrenMap = [];
+        Dictionary<ITreeItem, List<T>> childrenMap = [];
         foreach (var item in originalItems)
         {
             if (item.Parent is null)
@@ -306,8 +306,8 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
         }
         return childrenMap;
     }
-    private static IEnumerable<T> EnumerateTreeItems<T>(IEnumerable<T> items, Dictionary<IResultData, List<T>> childrenMap)
-        where T : IResultData
+    private static IEnumerable<T> EnumerateTreeItems<T>(IEnumerable<T> items, Dictionary<ITreeItem, List<T>> childrenMap)
+        where T : ITreeItem
     {
         foreach (var item in items)
         {
@@ -322,7 +322,7 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
     public static IEnumerable<T> SortTreeItems<T, TKey>(IEnumerable<T> originalItems,
                                                         Func<T, TKey> keySelector,
                                                         bool ascending = true)
-        where T : IResultData
+        where T : ITreeItem
     {
         var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
         foreach (var kv in childrenMap)
@@ -340,13 +340,13 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
     public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
                                                   Comparison<T> comparison,
                                                   bool ascending = true)
-        where T : IResultData
+        where T : ITreeItem
     {
         return SortTreeItems(originalItems, Comparer<T>.Create(ascending ? comparison : (x, y) => comparison(y, x)));
     }
     public static IEnumerable<T> SortTreeItems<T>(IEnumerable<T> originalItems,
                                                   IComparer<T> comparer)
-        where T : IResultData
+        where T : ITreeItem
     {
         var childrenMap = BuildChildrenMap(originalItems, out var rootItems);
         foreach (var kv in childrenMap)
@@ -477,16 +477,16 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
             },
         };
     }
-    private static IEnumerable<IResultData> BuildExpandedItems(IResultData parentRow)
+    private static IEnumerable<ITreeItem> BuildExpandedItems(ITreeItem parentTreeItem)
     {
-        yield return parentRow;
+        yield return parentTreeItem;
         bool hasChildren = false;
-        foreach (var item in parentRow.GetChildren())
+        foreach (var item in parentTreeItem.GetChildren())
         {
             hasChildren = true;
             yield return item;
         }
-        parentRow.IsExpaned = hasChildren;
+        parentTreeItem.IsExpaned = hasChildren;
     }
 
     private static async IAsyncEnumerable<object?> NormalizePSObjects(PSDataCollection<PSObject> pSObjects,

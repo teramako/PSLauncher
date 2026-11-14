@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<FileTreeItem>
+public class FileTreeItem : INotifyPropertyChanged, ITreeItem, IResultData<FileTreeItem>
 {
     private readonly FileSystemInfo? file;
     private readonly ReadOnlyCollection<FileSystemInfo>? children;
@@ -35,7 +35,7 @@ public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<Fil
     }
 
     public int Index { get; }
-    public IResultData? Parent { get; private set; }
+    public ITreeItem? Parent { get; private set; }
     public object? RawValue => file;
     public string Name { get; }
     public ImageSource? Icon => file is not null ? NativeMethods.GetIcon(file) : null;
@@ -60,7 +60,7 @@ public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<Fil
     public bool HasAvailableValue => file is not null;
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void SetParent(IResultData parent)
+    public void SetParent(ITreeItem parent)
     {
         Parent = parent;
         Level = parent.Level + 1;
@@ -74,7 +74,7 @@ public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<Fil
         _ => string.Empty
     };
 
-    public IEnumerable<IResultData> GetChildren()
+    public IEnumerable<ITreeItem> GetChildren()
     {
         if (children is not null)
         {
@@ -95,7 +95,7 @@ public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<Fil
         }
     }
 
-    public static IEnumerable<FileTreeItem> ExtractObject(IResultData data)
+    public static IEnumerable<FileTreeItem> ExtractObject(ITreeItem data)
     {
         return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];
     }
@@ -110,7 +110,7 @@ public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<Fil
         }
     }
 
-    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
+    public static Dictionary<string, Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>> Sorters { get; } = new() {
         ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)

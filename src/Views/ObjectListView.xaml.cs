@@ -237,7 +237,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
 
     private static object? GetRawValue(object item) => item switch
     {
-        IResultData resultData => resultData.HasAvailableValue ? resultData.RawValue : null,
+        ITreeItem treeItem => treeItem.HasAvailableValue ? treeItem.RawValue : null,
         ValueData valueData => valueData.Value,
         _ => item
     };
@@ -290,8 +290,8 @@ public partial class ObjectListView : UserControl, IResultContentControl
         List<string> lines = [];
         foreach (var item in items)
         {
-            var line = item is IResultData data
-                ? string.Join("\t", columns.Select(col => data.GetColumnValue(col.SortMemberPath)))
+            var line = item is ITreeItem treeItem
+                ? string.Join("\t", columns.Select(col => treeItem.GetColumnValue(col.SortMemberPath)))
                 : string.Join("\t", columns.Select(col => $"{item.GetType().GetProperty(col.SortMemberPath)?.GetValue(item)}"));
             lines.Add(line);
         }

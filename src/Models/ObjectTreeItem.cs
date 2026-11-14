@@ -7,10 +7,10 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ObjectTreeItem : INotifyPropertyChanged, IResultData, IResultData<ObjectTreeItem>
+public class ObjectTreeItem : INotifyPropertyChanged, ITreeItem, IResultData<ObjectTreeItem>
 {
     public int Index { get; }
-    public IResultData? Parent { get; private set; }
+    public ITreeItem? Parent { get; private set; }
     public string Name { get; set; }
     public string Type { get; set; }
     public string Value { get; set; } = string.Empty;
@@ -71,7 +71,7 @@ public class ObjectTreeItem : INotifyPropertyChanged, IResultData, IResultData<O
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public void SetParent(IResultData parent)
+    public void SetParent(ITreeItem parent)
     {
         Parent = parent;
         Level = parent.Level + 1;
@@ -85,7 +85,7 @@ public class ObjectTreeItem : INotifyPropertyChanged, IResultData, IResultData<O
         _ => string.Empty
     };
 
-    public IEnumerable<IResultData> GetChildren()
+    public IEnumerable<ITreeItem> GetChildren()
     {
         foreach (var child in ExtractObject(RawValue, ExpandType))
         {
@@ -240,7 +240,7 @@ public class ObjectTreeItem : INotifyPropertyChanged, IResultData, IResultData<O
         }
     }
 
-    public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
+    public static Dictionary<string, Func<IEnumerable<ITreeItem>, bool, IEnumerable<ITreeItem>>> Sorters { get; } = new() {
         ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
