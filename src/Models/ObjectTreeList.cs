@@ -11,7 +11,7 @@ using System.Security;
 
 namespace PSLauncher.Models;
 
-public class ResultList : IResultList, INotifyPropertyChanged
+public class ObjectTreeList : IResultList, INotifyPropertyChanged
 {
     public object? RootObject { get; init; }
     public string Description { get; init; } = string.Empty;
@@ -167,12 +167,12 @@ public class ResultList : IResultList, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
+    /// Build <seealso cref="ObjectTreeList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
     /// </summary>
     /// <param name="psObjects"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static async Task<ResultList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
+    public static async Task<ObjectTreeList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
     {
         int itemCount = psObjects.Count;
         if (itemCount == 0)
@@ -198,7 +198,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
         if (isString)
         {
             var strings = objects.OfType<string>();
-            return new ResultList
+            return new ObjectTreeList
             {
                 RootObject = psObjects,
                 Description = itemCount > 1 ? $"String {{ Count = {itemCount} }}" : "String",
@@ -211,7 +211,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
             return BuildAsFilesTree(objects.OfType<FileSystemInfo>());
         }
 
-        return new ResultList
+        return new ObjectTreeList
         {
             RootObject = psObjects,
             Items = [.. BuildExpandedItems(new ResultData("Results", psObjects, ObjectNodeType.VirtualRow))],
@@ -220,7 +220,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
         };
     }
 
-    public static ResultList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
+    public static ObjectTreeList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
     {
         int itemCount = 0;
         Dictionary<string, List<FileSystemInfo>> childrenMap = [];
@@ -235,7 +235,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
             itemCount++;
         }
         int index = 0;
-        return new ResultList
+        return new ObjectTreeList
         {
             RootObject = fileSystemInfos,
             Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
@@ -357,20 +357,20 @@ public class ResultList : IResultList, INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from a single <seealso cref="PSObject"/>
+    /// Build <seealso cref="ObjectTreeList"/> instance from a single <seealso cref="PSObject"/>
     /// </summary>
     /// <param name="psObject"></param>
     /// <returns></returns>
     [return: NotNullIfNotNull(nameof(psObject))]
-    public static ResultList? Build(PSObject? psObject) => Build(Utils.GetBaseObject(psObject));
+    public static ObjectTreeList? Build(PSObject? psObject) => Build(Utils.GetBaseObject(psObject));
 
     /// <summary>
-    /// Build <seealso cref="ResultList"/> instance from an object.
+    /// Build <seealso cref="ObjectTreeList"/> instance from an object.
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
     [return: NotNullIfNotNull(nameof(obj))]
-    public static ResultList? Build(object? obj, ResultDataKind kind = ResultDataKind.NotSpecified)
+    public static ObjectTreeList? Build(object? obj, ResultDataKind kind = ResultDataKind.NotSpecified)
     {
         if (obj is null)
         {
@@ -379,42 +379,42 @@ public class ResultList : IResultList, INotifyPropertyChanged
         var baseType = Utils.GetTypeName(obj.GetType());
         return obj switch
         {
-            string str => new ResultList
+            string str => new ObjectTreeList
             {
                 RootObject = str,
                 Kind = ResultDataKind.Simple,
                 Description = baseType,
                 DisplayData = str
             },
-            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool => new ResultList
+            int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = baseType,
                 DisplayData = $"{obj}"
             },
-            Enum enumVal => new ResultList
+            Enum enumVal => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"Enum({baseType}) {enumVal:G} (0x{enumVal:X})",
                 DisplayData = $"{enumVal}"
             },
-            SecureString secureString => new ResultList
+            SecureString secureString => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"SecureString",
                 DisplayData = $"{secureString}"
             },
-            PSCredential credential => new ResultList
+            PSCredential credential => new ObjectTreeList
             {
                 RootObject = obj,
                 Kind = ResultDataKind.Simple,
                 Description = $"PSCredential [{credential.UserName}]",
                 DisplayData = $"{credential}"
             },
-            PSObject pso => new ResultList
+            PSObject pso => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow))],
@@ -422,7 +422,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
             },
-            FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ResultList
+            FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
@@ -430,7 +430,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
             },
-            FileSystemInfo fileSystemInfo => new ResultList
+            FileSystemInfo fileSystemInfo => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new FileResultData(fileSystemInfo))],
@@ -438,28 +438,28 @@ public class ResultList : IResultList, INotifyPropertyChanged
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
             },
-            Array array => new ResultList
+            Array array => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
-            IDictionary dictionary => new ResultList
+            IDictionary dictionary => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
-            ICollection collection => new ResultList
+            ICollection collection => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
-            Exception ex => new ResultList
+            Exception ex => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow))],
@@ -467,7 +467,7 @@ public class ResultList : IResultList, INotifyPropertyChanged
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
             },
-            _ => new ResultList
+            _ => new ObjectTreeList
             {
                 RootObject = obj,
                 Items = [.. BuildExpandedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow))],

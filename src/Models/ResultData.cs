@@ -241,7 +241,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     }
 
     public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
-        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+        ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
             {
@@ -251,6 +251,6 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
             }
             return x.NodeType.CompareTo(y.NodeType);
         }, asc),
-        ["Type"] = (items, asc) => ResultList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
+        ["Type"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<ResultData>(), static x => x.Type, asc),
     };
 }

@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class PinnedItem : ResultList
+public class PinnedItem : ObjectTreeList
 {
     public PinnedItem(object obj)
     {

@@ -16,7 +16,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Grid d:DataContext="{d:DesignInstance Type=model:ResultList}">
+                        <Grid d:DataContext="{d:DesignInstance Type=model:ObjectTreeList}">
                             <ToggleButton Name="PopupButton" ToolTip="{Binding Description}">
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Name="IconGrid" Width="16" Height="16" Margin="0,0,4,0" Visibility="Collapsed">

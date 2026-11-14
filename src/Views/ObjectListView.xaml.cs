@@ -27,13 +27,13 @@ public partial class ObjectListView : UserControl, IResultContentControl
     {
         switch (e.NewValue)
         {
-            case ResultList newList:
-                Root.Visibility = newList is { Kind: ResultDataKind.Simple or ResultDataKind.NotSpecified }
+            case ObjectTreeList treeList:
+                Root.Visibility = treeList is { Kind: ResultDataKind.Simple or ResultDataKind.NotSpecified }
                                 ? Visibility.Collapsed
                                 : Visibility.Visible;
                 Root.AutoGenerateColumns = false;
-                ChangeColumns(newList, e.OldValue as ResultList);
-                SetContextMenu(newList.Kind);
+                ChangeColumns(treeList, e.OldValue as ObjectTreeList);
+                SetContextMenu(treeList.Kind);
                 break;
             case TableList tableList:
                 Root.Visibility = Visibility.Visible;
@@ -90,7 +90,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
         }
     }
 
-    private void ChangeColumns(ResultList? newList, ResultList? oldList)
+    private void ChangeColumns(ObjectTreeList? newList, ObjectTreeList? oldList)
     {
         if (newList is null)
             return;
@@ -168,7 +168,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
         if (!WpfUtils.TryFindParent<DataGrid>(sender as DependencyObject, out var dataGrid))
             return;
 
-        var data = DataContext as ResultList;
+        var data = DataContext as ObjectTreeList;
         if (data is null)
             return;
         var selectedIndex = dataGrid.SelectedIndex;
@@ -203,12 +203,12 @@ public partial class ObjectListView : UserControl, IResultContentControl
             return;
 
         var selectedIndex = dataGrid.SelectedIndex;
-        e.Handled = (DataContext as ResultList)?.Toggle(selectedIndex) ?? false;
+        e.Handled = (DataContext as ObjectTreeList)?.Toggle(selectedIndex) ?? false;
     }
 
     private void OnSorting(object sender, DataGridSortingEventArgs e)
     {
-        if (DataContext is not ResultList dataList)
+        if (DataContext is not ObjectTreeList treeList)
             return;
         var col = e.Column;
         var currentDirection = col.SortDirection;
@@ -218,7 +218,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
             ListSortDirection.Descending => null,
             _ => ListSortDirection.Ascending,
         };
-        if (dataList.Sort(sortDirection, col.SortMemberPath))
+        if (treeList.Sort(sortDirection, col.SortMemberPath))
         {
             col.SortDirection = sortDirection;
             e.Handled = true;
@@ -334,14 +334,14 @@ public partial class ObjectListView : UserControl, IResultContentControl
         var items = GetSelectedRawValues().ToArray();
         if (items.Length == 0)
             return;
-        var resultList = items.Length == 1
-            ? ResultList.Build(items[0], ResultDataKind.Objects)
-            : ResultList.Build(items, ResultDataKind.Objects);
+        var treeList = items.Length == 1
+            ? ObjectTreeList.Build(items[0], ResultDataKind.Objects)
+            : ObjectTreeList.Build(items, ResultDataKind.Objects);
 
-        if (resultList.Count == 0)
+        if (treeList.Count == 0)
             return;
 
-        var win = new ObjectsViewWindow(resultList);
+        var win = new ObjectsViewWindow(treeList);
         win.Show();
     }
     #endregion
@@ -357,8 +357,8 @@ public partial class ObjectListView : UserControl, IResultContentControl
         if (!fileInfos.Any())
             return;
 
-        var resultList = ResultList.BuildAsFilesTree(fileInfos);
-        var win = new ObjectsViewWindow(resultList);
+        var treeList = ObjectTreeList.BuildAsFilesTree(fileInfos);
+        var win = new ObjectsViewWindow(treeList);
         win.Show();
     }
     #endregion

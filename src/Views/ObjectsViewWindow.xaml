@@ -7,7 +7,7 @@
         xmlns:view="clr-namespace:PSLauncher.Views"
         xmlns:model="clr-namespace:PSLauncher.Models"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type=model:ResultList}"
+        d:DataContext="{d:DesignInstance Type=model:ObjectTreeList}"
         Title="Objects View"
         Height="450" Width="600"
         MaxHeight="800"

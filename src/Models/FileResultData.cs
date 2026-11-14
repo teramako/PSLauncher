@@ -111,7 +111,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
     }
 
     public static Dictionary<string, Func<IEnumerable<IResultData>, bool, IEnumerable<IResultData>>> Sorters { get; } = new() {
-        ["Name"] = static (items, asc) => ResultList.SortTreeItems(items, static (x, y) =>
+        ["Name"] = static (items, asc) => ObjectTreeList.SortTreeItems(items, static (x, y) =>
         {
             if (x.NodeType == y.NodeType)
             {
@@ -121,7 +121,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
             }
             return x.NodeType.CompareTo(y.NodeType);
         }, asc),
-        ["LastWriteTime"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.LastWriteTime, asc),
-        ["Size"] = (items, asc) => ResultList.SortTreeItems(items.OfType<FileResultData>(), static x => x.Size, asc),
+        ["LastWriteTime"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileResultData>(), static x => x.LastWriteTime, asc),
+        ["Size"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileResultData>(), static x => x.Size, asc),
     };
 }
