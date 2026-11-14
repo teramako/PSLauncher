@@ -52,7 +52,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
     public void Append(object? data)
     {
         var c = Count;
-        Items.Add(new ResultData(c, data));
+        Items.Add(new ObjectTreeItem(c, data));
         Count = c + 1;
     }
 
@@ -214,7 +214,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
         return new ObjectTreeList
         {
             RootObject = psObjects,
-            Items = [.. BuildExpandedItems(new ResultData("Results", psObjects, ObjectNodeType.VirtualRow))],
+            Items = [.. BuildExpandedItems(new ObjectTreeItem("Results", psObjects, ObjectNodeType.VirtualRow))],
             Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
             Kind = ResultDataKind.Objects,
         };
@@ -270,7 +270,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
                     break;
                 case ResultDataKind.Objects:
                 default:
-                    if (!ResultData.Sorters.TryGetValue(colName, out var sorter))
+                    if (!ObjectTreeItem.Sorters.TryGetValue(colName, out var sorter))
                         return false;
                     results = [.. sorter(Items, ascending)];
                     Sorter = (sorter, ascending);
@@ -417,7 +417,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
             PSObject pso => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("PSObject", pso, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("PSObject", pso, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"PSObject({pso.TypeNames[0]})",
                 DisplayData = $"{pso}"
@@ -425,7 +425,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
             FileSystemInfo fileSystemInfo when kind is ResultDataKind.Objects => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("FileSystem", fileSystemInfo, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
@@ -441,28 +441,28 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
             Array array => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Array", array, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Array", array, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Length = {array.Length} }}",
             },
             IDictionary dictionary => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Dictionary", dictionary, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {dictionary.Count} }}",
             },
             ICollection collection => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Collection", collection, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Collection", collection, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType} {{ Count = {collection.Count} }}",
             },
             Exception ex => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData("Exception", ex, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem("Exception", ex, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = $"{baseType}: {ex.Message}",
                 DisplayData = $"{ex}"
@@ -470,7 +470,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
             _ => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new ResultData(baseType, obj, ObjectNodeType.VirtualRow))],
+                Items = [.. BuildExpandedItems(new ObjectTreeItem(baseType, obj, ObjectNodeType.VirtualRow))],
                 Kind = ResultDataKind.Objects,
                 Description = baseType,
                 DisplayData = Utils.ObjectToString(obj)

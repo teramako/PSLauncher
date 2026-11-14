@@ -98,7 +98,7 @@ public class PinnedItem : ObjectTreeList
         {
             DirectoryInfo dir => FileResultData.ExtractObject(dir),
             FileInfo file => [new FileResultData(file, 0)],
-            _ => ResultData.ExtractObject(RootObject),
+            _ => ObjectTreeItem.ExtractObject(RootObject),
         };
         foreach (var item in items)
         {
