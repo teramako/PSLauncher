@@ -20,7 +20,7 @@
         <Expander x:Name="DetailExpander" Style="{StaticResource ResultExpanderStyle}"
                   Header="_Detail:"
                   MaxHeight="600">
-            <local:ExpandableDataGridControl x:Name="DetailDataGrid" DataContext="{Binding}"/>
+            <local:ObjectListView x:Name="DetailDataGrid" DataContext="{Binding}"/>
         </Expander>
     </StackPanel>
 </UserControl>

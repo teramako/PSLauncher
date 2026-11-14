@@ -90,7 +90,7 @@
                                         <TextBox Name="ResultText" Style="{StaticResource ResultTextBoxStyle}"
                                                  Text="{Binding DisplayData, Mode=OneWay}"
                                                  IsEnabled="{Binding HasDisplayData}"/>
-                                        <view:ExpandableDataGridControl x:Name="DetailDataGrid" DataContext="{Binding}" MaxHeight="200"/>
+                                        <view:ObjectListView x:Name="DetailDataGrid" DataContext="{Binding}" MaxHeight="200"/>
                                     </StackPanel>
                                 </ContentControl>
                             </Popup>

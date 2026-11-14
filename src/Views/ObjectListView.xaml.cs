@@ -11,11 +11,11 @@ using System.Windows.Threading;
 namespace PSLauncher.Views;
 
 /// <summary>
-/// ExpandableDataGridControl.xaml
+/// ObjectListView.xaml
 /// </summary>
-public partial class ExpandableDataGridControl : UserControl, IResultContentControl
+public partial class ObjectListView : UserControl, IResultContentControl
 {
-    public ExpandableDataGridControl()
+    public ObjectListView()
     {
         InitializeComponent();
     }

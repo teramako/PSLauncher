@@ -14,6 +14,6 @@
         ThemeMode="Dark"
         SizeToContent="Height">
     <DockPanel Margin="5">
-        <view:ExpandableDataGridControl x:Name="DetailDataGrid" DataContext="{Binding}"/>
+        <view:ObjectListView x:Name="DetailDataGrid" DataContext="{Binding}"/>
     </DockPanel>
 </Window>
