@@ -57,7 +57,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
     }
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; }
-    public Type DataType { get; } = typeof(FileSystemInfo);
+    public bool HasAvailableValue => file is not null;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void SetParent(IResultData parent)

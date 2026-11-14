@@ -225,61 +225,46 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         }
     }
 
+    private IEnumerable<object> GetSelectedRawValues()
+    {
+        foreach (var item in Root.SelectedItems)
+        {
+            var value = GetRawValue(item);
+            if (value is not null)
+                yield return value;
+        }
+    }
+
+    private static object? GetRawValue(object item) => item switch
+    {
+        IResultData resultData => resultData.HasAvailableValue ? resultData.RawValue : null,
+        ValueData valueData => valueData.Value,
+        _ => item
+    };
+
     private void OnCanCopyValue(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = Root.SelectedItems.OfType<object?>().Any(x => x switch
-        {
-            null => false,
-            IResultData item => item.ValueType switch
-            {
-                ObjectValueType.Null => false,
-                ObjectValueType.String or ObjectValueType.Number or ObjectValueType.Boolean
-                or ObjectValueType.Enum or ObjectValueType.Temporal or ObjectValueType.Exception
-                or ObjectValueType.File or ObjectValueType.Directory => true,
-                _ => !string.IsNullOrEmpty(Utils.ObjectToString(item.RawValue))
-            },
-            _ => true
-        });
-        e.Handled = true;
+        e.CanExecute = GetSelectedRawValues().Any();
     }
 
     private void OnCopyValue(object sender, ExecutedRoutedEventArgs e)
     {
         StringCollection files = [];
         List<string> texts = [];
-        foreach (var obj in Root.SelectedItems)
+        foreach (var obj in GetSelectedRawValues())
         {
             e.Handled = true;
-            switch (obj)
+            if (obj is FileSystemInfo fsInfo)
             {
-                case IResultData item:
-                    switch (item.ValueType)
-                    {
-                        case ObjectValueType.File or ObjectValueType.Directory:
-                            AddAsFileSystem(item.RawValue);
-                            break;
-                        case ObjectValueType.String or ObjectValueType.Number:
-                        case ObjectValueType.Boolean or ObjectValueType.Enum:
-                        case ObjectValueType.Temporal or ObjectValueType.Exception:
-                            texts.Add($"{item.RawValue}");
-                            break;
-                        default:
-                            AddAsText(item.RawValue);
-                            break;
-                    }
-                    break;
-                case ValueData valueData:
-                    if (valueData.Value is FileSystemInfo)
-                        AddAsFileSystem(valueData.Value);
-                    else
-                        AddAsText(valueData.Value);
-                    break;
-                case FileSystemInfo fileSystemInfo:
-                    AddAsFileSystem(fileSystemInfo);
-                    break;
-                default:
-                    AddAsText(obj);
-                    break;
+                var filePath = $"{fsInfo}";
+                files.Add(filePath);
+                texts.Add(filePath);
+            }
+            else
+            {
+                var text = $"{obj}";
+                if (!string.IsNullOrEmpty(text))
+                    texts.Add(text);
             }
         }
         var data = new DataObject();
@@ -288,21 +273,8 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
         if (texts.Count > 0)
             data.SetText(string.Join(Environment.NewLine, texts));
         Clipboard.SetDataObject(data, true);
-
-        void AddAsFileSystem(object? fileSystemInfo)
-        {
-            if (fileSystemInfo is null)
-                return;
-            var filePath = $"{fileSystemInfo}";
-            files.Add(filePath);
-            texts.Add(filePath);
-        }
-        void AddAsText(object? obj)
-        {
-            var text = Utils.ObjectToString(obj);
-            texts.Add(text);
-        }
     }
+
     private void OnCanCopyRow(object sender, CanExecuteRoutedEventArgs e)
     {
         e.CanExecute = Root.SelectedItems.Count > 0;
@@ -335,96 +307,39 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
     #region PinItem command handlers
     private void CanPinItem(object sender, CanExecuteRoutedEventArgs e)
     {
-        var items = Root.SelectedItems;
-        if (items.Count == 0)
-        {
-            e.CanExecute = false;
-            return;
-        }
-
-        e.CanExecute = items.OfType<object>().Any(static item =>
-        {
-            return item is not IResultData data
-                   || data is not { RawValue: null } and not { NodeType: ObjectNodeType.VirtualRow };
-        });
+        e.CanExecute = GetSelectedRawValues().Any();
     }
     private void PinItem(object sender, ExecutedRoutedEventArgs e)
     {
         if (App.Current?.MainWindow is not MainWindow mainWindow)
             return;
 
-        mainWindow.PinItems(Root.SelectedItems);
+        mainWindow.PinItems(GetSelectedRawValues());
     }
     #endregion
 
     #region OpenInObjectsTreeWindow command handlers
     private void OnCanOpenInObjectsTreeWindow(object sender, CanExecuteRoutedEventArgs e)
     {
-        var items = Root.SelectedItems;
-        if (items.Count == 0)
+        var items = GetSelectedRawValues().ToArray();
+        e.CanExecute = items.Length switch
         {
-            e.CanExecute = false;
-            return;
-        }
-
-        if (items.Count == 1)
-        {
-            e.CanExecute = items[0] switch
-            {
-                null => false,
-                IResultData data => data switch
-                {
-                    { RawValue: null } => false,
-                    { ValueType: ObjectValueType.Null } => false,
-                    { ValueType: ObjectValueType.Boolean } => false,
-                    { ValueType: ObjectValueType.Number } => false,
-                    { ValueType: ObjectValueType.Enum } => false,
-                    { ValueType: ObjectValueType.String } => false,
-                    _ => true
-                },
-                _ => true
-            };
-        }
-        else
-        {
-            e.CanExecute = !items.OfType<IResultData>().All(static x => x.NodeType is ObjectNodeType.VirtualRow);
-        }
+            0 => false,
+            1 => items[0] is not (string or int or uint or long or ulong or short or ushort or byte or sbyte or float or double or decimal or bool or Enum),
+            _ => true,
+        };
     }
     private void OnOpenInObjectsTreeWindow(object sender, ExecutedRoutedEventArgs e)
     {
-        IResultList resultList;
-        var items = Root.SelectedItems;
-        if (items.Count == 0)
+        var items = GetSelectedRawValues().ToArray();
+        if (items.Length == 0)
             return;
-        if (items.Count == 1)
-        {
-            var item = items[0];
-            if (item is null)
-                return;
-            if (item is IResultData data)
-            {
-                if (data.RawValue is null || data.ValueType is ObjectValueType.Null)
-                    return;
+        var resultList = items.Length == 1
+            ? ResultList.Build(items[0], ResultDataKind.Objects)
+            : ResultList.Build(items, ResultDataKind.Objects);
 
-                resultList = ResultList.Build(data.RawValue, ResultDataKind.Objects);
-            }
-            else
-            {
-                resultList = ResultList.Build(item, ResultDataKind.Objects);
-            }
-        }
-        else
-        {
-            var list = DataContext is ResultList
-                       ? items.OfType<IResultData>()
-                              .Where(static x => x.ValueType is not ObjectValueType.Null)
-                              .Select(static x => x.RawValue)
-                              .ToArray()
-                       : [.. items];
-            if (list.Length == 0)
-                return;
-            resultList = ResultList.Build(list, ResultDataKind.Objects);
-        }
+        if (resultList.Count == 0)
+            return;
 
         var win = new ObjectsViewWindow(resultList);
         win.Show();
@@ -434,37 +349,12 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
     #region OpenInFilesTreeWindow command handlers
     private void OnCanOpenInFilesTreeWindow(object sender, CanExecuteRoutedEventArgs e)
     {
-        foreach (var item in Root.SelectedItems)
-        {
-            if (item is FileSystemInfo
-                     or ValueData { Value: FileSystemInfo }
-                     or IResultData { RawValue: FileSystemInfo })
-            {
-                e.CanExecute = true;
-                return;
-            }
-        }
-        e.CanExecute = false;
+        e.CanExecute = GetSelectedRawValues().OfType<FileSystemInfo>().Any();
     }
     private void OnOpenInFilesTreeWindow(object sender, ExecutedRoutedEventArgs e)
     {
-        List<FileSystemInfo> fileInfos = [];
-        foreach (var item in Root.SelectedItems)
-        {
-            switch (item)
-            {
-                case FileSystemInfo fs:
-                    fileInfos.Add(fs);
-                    break;
-                case ValueData { Value: FileSystemInfo fs }:
-                    fileInfos.Add(fs);
-                    break;
-                case IResultData { RawValue: FileSystemInfo fs }:
-                    fileInfos.Add(fs);
-                    break;
-            }
-        }
-        if (fileInfos.Count == 0)
+        var fileInfos = GetSelectedRawValues().OfType<FileSystemInfo>();
+        if (!fileInfos.Any())
             return;
 
         var resultList = ResultList.BuildAsFilesTree(fileInfos);
@@ -476,28 +366,19 @@ public partial class ExpandableDataGridControl : UserControl, IResultContentCont
     #region OpenInTableViewWindow command handlers
     private void OnCanOpenInTableViewWindow(object sender, CanExecuteRoutedEventArgs e)
     {
-        var items = Root.SelectedItems;
-        e.CanExecute = items.OfType<IResultData>().Any(static x => x.RawValue is not null);
+        e.CanExecute = GetSelectedRawValues().Any();
     }
     private void OnOpenInTableViewWindow(object sender, ExecutedRoutedEventArgs e)
     {
-        TableList tableList;
-        var items = Root.SelectedItems;
-        if (items.Count == 1)
-        {
-            if (items[0] is not IResultData item || item.RawValue is null)
-                return;
+        var items = GetSelectedRawValues().ToArray();
+        if (items.Length == 0)
+            return;
 
-            tableList = item.RawValue is IEnumerable enumerable
-                ? TableList.Build(enumerable)
-                : TableList.Build(item.RawValue);
-        }
-        else
-        {
-            var resultsData = items.OfType<IResultData>().Where(static x => x.RawValue is not null);
-            tableList = TableList.Build(resultsData.Select(x => x.RawValue));
-        }
-
+        var tableList = items.Length == 1
+                        ? TableList.Build(items[0])
+                        : TableList.Build(items);
+        if (tableList is null)
+            return;
         var win = new ObjectsViewWindow(tableList);
         win.Show();
     }

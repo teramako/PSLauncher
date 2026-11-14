@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PSLauncher.Models;
 
 public interface IResultData
@@ -18,6 +20,8 @@ public interface IResultData
     /// </summary>
     /// <returns></returns>
     IEnumerable<IResultData> GetChildren();
+    [MemberNotNullWhen(true, nameof(RawValue))]
+    bool HasAvailableValue { get; }
 }
 
 public interface IResultData<T> : IResultData where T : IResultData

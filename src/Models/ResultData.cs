@@ -33,6 +33,7 @@ public class ResultData : INotifyPropertyChanged, IResultData, IResultData<Resul
     public ObjectNodeType NodeType { get; }
     public ObjectValueType ValueType { get; } = ObjectValueType.Null;
     public ExpandType ExpandType { get; } = ExpandType.Default;
+    public bool HasAvailableValue => RawValue is not null && ValueType is not ObjectValueType.Null;
 
     public ResultData(int index, object? rawValue)
         : this($"[{index}]", rawValue, ObjectNodeType.Index, index)

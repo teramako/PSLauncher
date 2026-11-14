@@ -21,29 +21,15 @@ public partial class MainWindow
         RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", pinItem);
     }
 
-    public void PinItems(IList selectedItems)
+    public void PinItems(IEnumerable<object> selectedItems)
     {
-        if (selectedItems.Count == 0)
-            return;
-
         object pinItem;
         List<object> items = [];
         HashSet<Type> types = [];
         foreach (var obj in selectedItems)
         {
-            var item = obj;
-            if (obj is IResultData data)
-            {
-                if (data is { NodeType: ObjectNodeType.VirtualRow } or { RawValue: null })
-                    continue;
-                item = data.RawValue;
-            }
-
-            items.Add(item);
-            if (Utils.GetDataType(item) is Type t)
-            {
-                types.Add(t);
-            }
+            items.Add(obj);
+            types.Add(Utils.GetDataType(obj));
         }
 
         if (items.Count == 0)

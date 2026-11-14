@@ -23,10 +23,17 @@ public class TableList : IResultList
     /// </remarks>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static TableList Build(object obj)
+    public static TableList? Build(object? obj)
     {
+        if (obj is null)
+            return null;
+
         var data = obj;
-        var t = Utils.GetDataType(obj);
+
+        if (data is IEnumerable enumerable)
+            return Build(enumerable);
+
+        var t = Utils.GetDataType(data);
         if (t == typeof(ValueType))
         {
             data = new ValueData(obj);
@@ -51,14 +58,13 @@ public class TableList : IResultList
     /// </summary>
     /// <param name="enumerable"></param>
     /// <returns></returns>
-    public static TableList Build(IEnumerable enumerable)
+    public static TableList? Build(IEnumerable enumerable)
     {
         List<object?> list = [];
         HashSet<Type> types = [];
         foreach (var obj in enumerable)
         {
             list.Add(obj);
-
             var t = Utils.GetDataType(obj);
             if (t == typeof(string))
             {
@@ -66,6 +72,9 @@ public class TableList : IResultList
             }
             types.Add(t);
         }
+
+        if (list.Count == 0)
+            return null;
 
         if (types.Count == 1)
         {
