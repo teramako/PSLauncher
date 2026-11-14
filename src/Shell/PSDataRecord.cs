@@ -1,4 +1,4 @@
-﻿namespace PSLauncher.Shell;
+namespace PSLauncher.Shell;
 
 /// <summary>
 /// Represents a single piece of data emitted from the PowerShell execution pipeline,

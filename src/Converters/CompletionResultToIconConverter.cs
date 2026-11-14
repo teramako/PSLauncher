@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Management.Automation;
 using System.Windows;
 using System.Windows.Controls;

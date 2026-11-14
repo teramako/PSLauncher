@@ -1,4 +1,4 @@
-﻿namespace PSLauncher.Shell;
+namespace PSLauncher.Shell;
 
 public class PSOutputEventArgs(PSDataRecord record) : EventArgs
 {
