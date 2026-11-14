@@ -5,25 +5,25 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<FileResultData>
+public class FileTreeItem : INotifyPropertyChanged, IResultData, IResultData<FileTreeItem>
 {
     private readonly FileSystemInfo? file;
     private readonly ReadOnlyCollection<FileSystemInfo>? children;
 
-    public FileResultData(FileSystemInfo file, int index = 0)
+    public FileTreeItem(FileSystemInfo file, int index = 0)
         : this(file.Name, file.FullName, file is FileInfo f ? f.Length : null, file.LastWriteTime, file.Attributes.HasFlag(FileAttributes.Directory), index)
     {
         this.file = file;
         HasChildren = IsDirectory = file.Attributes.HasFlag(FileAttributes.Directory);
     }
-    public FileResultData(string name, IList<FileSystemInfo> children, int index = 0)
+    public FileTreeItem(string name, IList<FileSystemInfo> children, int index = 0)
         : this(name, string.Empty, null, null, true, index)
     {
         Name = name;
         this.children = children.AsReadOnly();
         NodeType = ObjectNodeType.VirtualRow;
     }
-    public FileResultData(string name, string fullName, long? size, DateTime? lastWriteTime, bool isDirectory, int index = 0)
+    public FileTreeItem(string name, string fullName, long? size, DateTime? lastWriteTime, bool isDirectory, int index = 0)
     {
         Name = name;
         FullName = fullName;
@@ -80,7 +80,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
         {
             for (int i = 0; i < children.Count; i++)
             {
-                var childData = new FileResultData(children[i], i);
+                var childData = new FileTreeItem(children[i], i);
                 childData.SetParent(this);
                 yield return childData;
             }
@@ -95,17 +95,17 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
         }
     }
 
-    public static IEnumerable<FileResultData> ExtractObject(IResultData data)
+    public static IEnumerable<FileTreeItem> ExtractObject(IResultData data)
     {
         return data.RawValue is DirectoryInfo dirInfo ? ExtractObject(dirInfo) : [];
     }
 
-    public static IEnumerable<FileResultData> ExtractObject(DirectoryInfo parentDir)
+    public static IEnumerable<FileTreeItem> ExtractObject(DirectoryInfo parentDir)
     {
         int index = 0;
         foreach (var file in parentDir.GetFileSystemInfos())
         {
-            var fileData = new FileResultData(file, index++);
+            var fileData = new FileTreeItem(file, index++);
             yield return fileData;
         }
     }
@@ -121,7 +121,7 @@ public class FileResultData : INotifyPropertyChanged, IResultData, IResultData<F
             }
             return x.NodeType.CompareTo(y.NodeType);
         }, asc),
-        ["LastWriteTime"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileResultData>(), static x => x.LastWriteTime, asc),
-        ["Size"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileResultData>(), static x => x.Size, asc),
+        ["LastWriteTime"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileTreeItem>(), static x => x.LastWriteTime, asc),
+        ["Size"] = (items, asc) => ObjectTreeList.SortTreeItems(items.OfType<FileTreeItem>(), static x => x.Size, asc),
     };
 }

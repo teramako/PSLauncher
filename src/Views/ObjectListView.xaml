@@ -13,7 +13,7 @@
              DataContextChanged="OnDataContextChanged">
     <UserControl.Resources>
         <ControlTemplate x:Key="IconImage">
-            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileResultData}"/>
+            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileTreeItem}"/>
         </ControlTemplate>
         <!-- DataGrid columns for Object view -->
         <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name" IsReadOnly="True" CanUserReorder="False">

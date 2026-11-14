@@ -96,8 +96,8 @@ public class PinnedItem : ObjectTreeList
 
         IEnumerable<IResultData> items = RootObject switch
         {
-            DirectoryInfo dir => FileResultData.ExtractObject(dir),
-            FileInfo file => [new FileResultData(file, 0)],
+            DirectoryInfo dir => FileTreeItem.ExtractObject(dir),
+            FileInfo file => [new FileTreeItem(file, 0)],
             _ => ObjectTreeItem.ExtractObject(RootObject),
         };
         foreach (var item in items)

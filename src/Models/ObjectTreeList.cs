@@ -238,7 +238,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
         return new ObjectTreeList
         {
             RootObject = fileSystemInfos,
-            Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileResultData(kv.Key, kv.Value, index++)))],
+            Items = [.. childrenMap.SelectMany(kv => BuildExpandedItems(new FileTreeItem(kv.Key, kv.Value, index++)))],
             Description = itemCount > 1 ? $"FileSystemInfo {{ Count = {itemCount} }}" : "FileSystemInfo",
             Kind = ResultDataKind.Files,
         };
@@ -263,7 +263,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
                 case ResultDataKind.Simple:
                     return false;
                 case ResultDataKind.Files:
-                    if (!FileResultData.Sorters.TryGetValue(colName, out var fileSorter))
+                    if (!FileTreeItem.Sorters.TryGetValue(colName, out var fileSorter))
                         return false;
                     results = [.. fileSorter(Items, ascending)];
                     Sorter = (fileSorter, ascending);
@@ -433,7 +433,7 @@ public class ObjectTreeList : IResultList, INotifyPropertyChanged
             FileSystemInfo fileSystemInfo => new ObjectTreeList
             {
                 RootObject = obj,
-                Items = [.. BuildExpandedItems(new FileResultData(fileSystemInfo))],
+                Items = [.. BuildExpandedItems(new FileTreeItem(fileSystemInfo))],
                 Kind = ResultDataKind.Files,
                 Description = baseType,
                 DisplayData = $"{fileSystemInfo.FullName}"
