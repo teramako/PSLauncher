@@ -73,14 +73,14 @@ public partial class ObjectListView : UserControl, IResultContentControl
 
         foreach (var column in Root.Columns)
         {
-            if (column.Header is not string header
-                || !columnDict.TryGetValue(header, out var gridColumn))
+            var propertyName = column.SortMemberPath;
+            if (!columnDict.TryGetValue(propertyName, out var gridColumn))
             {
                 column.Visibility = Visibility.Collapsed;
                 continue;
             }
 
-            if (header != gridColumn.Header)
+            if (propertyName != gridColumn.Header)
                 column.Header = gridColumn.Header;
 
             if (gridColumn.DisplayIndex >= 0)
