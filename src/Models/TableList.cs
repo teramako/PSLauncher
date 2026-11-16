@@ -28,7 +28,7 @@ public class TableList : IObjectList
         if (obj is null)
             return null;
 
-        var data = obj;
+        var data = Utils.GetBaseObject(obj);
 
         if (data is IEnumerable enumerable)
             return Build(enumerable);
@@ -64,8 +64,9 @@ public class TableList : IObjectList
         HashSet<Type> types = [];
         foreach (var obj in enumerable)
         {
-            list.Add(obj);
-            var t = Utils.GetDataType(obj);
+            var item = Utils.GetBaseObject(obj);
+            list.Add(item);
+            var t = Utils.GetDataType(item);
             if (t == typeof(string))
             {
                 t = typeof(ValueType);
