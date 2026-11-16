@@ -54,7 +54,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
         {
             if (columnDict.TryGetValue(e.PropertyName, out var column))
             {
-                if (!column.Enalbed)
+                if (!column.Enabled)
                 {
                     e.Cancel = true;
                 }
