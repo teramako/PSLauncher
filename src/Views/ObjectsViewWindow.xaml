@@ -13,7 +13,10 @@
         MaxHeight="800"
         ThemeMode="Dark"
         SizeToContent="Height">
-    <DockPanel Margin="5">
+    <StackPanel Orientation="Vertical" Margin="5">
+        <TextBox Name="DisplayData" Style="{StaticResource ResultTextBoxStyle}"
+                 Text="{Binding DisplayData, Mode=OneWay, FallbackValue=&lt;none&gt;}"
+                 IsEnabled="{Binding HasDisplayData}"/>
         <view:ObjectListView x:Name="DetailDataGrid" DataContext="{Binding}"/>
-    </DockPanel>
+    </StackPanel>
 </Window>

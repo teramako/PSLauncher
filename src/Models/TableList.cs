@@ -8,6 +8,8 @@ namespace PSLauncher.Models;
 public class TableList : IObjectList
 {
     public required string Description { get; init; }
+    public string DisplayData => string.Empty;
+    public bool HasDisplayData => false;
     public object? RootObject { get; init; }
     public required List<object?> Items { get; init; }
     ICollection IObjectList.Items => Items;
