@@ -166,60 +166,6 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
         return false;
     }
 
-    /// <summary>
-    /// Build <seealso cref="ObjectTreeList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
-    /// </summary>
-    /// <param name="psObjects"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public static async Task<ObjectTreeList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
-    {
-        int itemCount = psObjects.Count;
-        if (itemCount == 0)
-        {
-            return null;
-        }
-        if (itemCount == 1)
-        {
-            return Build(psObjects[0]);
-        }
-
-        List<object?> objects = [];
-        bool isString = true;
-        bool isFileSystemInfo = true;
-        await foreach (var obj in NormalizePSObjects(psObjects, cancellationToken))
-        {
-            objects.Add(obj);
-            if (isString)
-                isString = obj is string;
-            if (isFileSystemInfo)
-                isFileSystemInfo = obj is FileSystemInfo;
-        }
-        if (isString)
-        {
-            var strings = objects.OfType<string>();
-            return new ObjectTreeList
-            {
-                RootObject = psObjects,
-                Description = itemCount > 1 ? $"String {{ Count = {itemCount} }}" : "String",
-                DisplayData = string.Join(Environment.NewLine, strings),
-                Kind = ResultDataKind.Simple,
-            };
-        }
-        else if (isFileSystemInfo)
-        {
-            return BuildAsFilesTree(objects.OfType<FileSystemInfo>());
-        }
-
-        return new ObjectTreeList
-        {
-            RootObject = psObjects,
-            Items = [.. BuildExpandedItems(new ObjectTreeItem("Results", psObjects, ObjectNodeType.VirtualRow))],
-            Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
-            Kind = ResultDataKind.Objects,
-        };
-    }
-
     public static ObjectTreeList BuildAsFilesTree(IEnumerable<FileSystemInfo> fileSystemInfos)
     {
         int itemCount = 0;
@@ -354,6 +300,72 @@ public class ObjectTreeList : IObjectList, INotifyPropertyChanged
             childrenMap[kv.Key] = [.. kv.Value.Order(comparer)];
         }
         return EnumerateTreeItems(rootItems.Order(comparer), childrenMap);
+    }
+
+    /// <summary>
+    /// Build <seealso cref="ObjectTreeList"/> instance from results of <seealso cref="PowerShell.Invoke()"/>
+    /// </summary>
+    /// <param name="psObjects"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<ObjectTreeList?> BuildAsync(PSDataCollection<PSObject> psObjects, CancellationToken cancellationToken = default)
+    {
+        int itemCount = psObjects.Count;
+        if (itemCount == 0)
+        {
+            return null;
+        }
+        if (itemCount == 1)
+        {
+            return Build(psObjects[0]);
+        }
+
+        return Build(NormalizePSObjects(psObjects, cancellationToken).ToBlockingEnumerable(cancellationToken));
+    }
+
+    public static ObjectTreeList? Build(IEnumerable enumerable, ResultDataKind kind = ResultDataKind.NotSpecified)
+    {
+        List<object?> objects = [];
+        bool isString = true;
+        bool isFileSystemInfo = true;
+
+        foreach (var item in enumerable)
+        {
+            var obj = Utils.GetBaseObject(item);
+            objects.Add(obj);
+            if (isString)
+                isString = obj is string;
+            if (isFileSystemInfo)
+                isFileSystemInfo = obj is FileSystemInfo;
+        }
+
+        int itemCount = objects.Count;
+        if (itemCount == 0)
+            return null;
+
+        if (isString)
+        {
+            var strings = objects.OfType<string>();
+            return new ObjectTreeList
+            {
+                RootObject = strings,
+                Description = itemCount > 1 ? $"String {{ Count = {itemCount} }}" : "String",
+                DisplayData = string.Join(Environment.NewLine, strings),
+                Kind = ResultDataKind.Simple,
+            };
+        }
+        else if (isFileSystemInfo && kind is not ResultDataKind.Objects)
+        {
+            return BuildAsFilesTree(objects.OfType<FileSystemInfo>());
+        }
+
+        return new ObjectTreeList
+        {
+            RootObject = objects,
+            Items = [.. BuildExpandedItems(new ObjectTreeItem("Results", objects, ObjectNodeType.VirtualRow))],
+            Description = itemCount > 1 ? $"{{ Count = {itemCount} }}" : string.Empty,
+            Kind = ResultDataKind.Objects,
+        };
     }
 
     /// <summary>
