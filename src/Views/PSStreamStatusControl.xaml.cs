@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using PSLauncher.Models;
 using PSLauncher.Shell;
 
@@ -42,10 +43,22 @@ public partial class PSStreamStatusControl : UserControl
 
     public void ClearStreams()
     {
-        ErrorList.Clear();
-        WarningList.Clear();
-        VerboseList.Clear();
-        InformationList.Clear();
-        DebugList.Clear();
+        ResetStatusBarItem(ErrorStatus);
+        ResetStatusBarItem(WarningStatus);
+        ResetStatusBarItem(VerboseStatus);
+        ResetStatusBarItem(InformationStatus);
+        ResetStatusBarItem(DebugStatus);
+    }
+
+    private static void ResetStatusBarItem(StatusBarItem item)
+    {
+        if (item.DataContext is ObjectTreeList treeList)
+        {
+            treeList.Clear();
+        }
+        if (WpfUtils.TryFindChild<ToggleButton>(item, out var toggleButton))
+        {
+            toggleButton.IsChecked = false;
+        }
     }
 }
