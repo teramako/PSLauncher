@@ -81,10 +81,6 @@ public partial class MainWindow : Window
         {
             return false;
         }
-        if (script.StartsWith('!'))
-        {
-            script = $@"{CommandPrefix} {script[1..]}";
-        }
 
         bool isSuccess = false;
 

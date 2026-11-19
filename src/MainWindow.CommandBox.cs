@@ -62,7 +62,7 @@ public partial class MainWindow
         {
             case Key.Enter:
                 e.Handled = true;
-                string script = WpfUtils.GetInnerText(CommandBox);
+                string script = GetCommandLineText();
                 if (await ExecuteScript(script))
                 {
                     CommandBox.Document.Blocks.Clear();
@@ -93,6 +93,20 @@ public partial class MainWindow
                 StartCompletionAsync(autoAcceptSingleMatch: false);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Gets the command-line text from the command box.
+    /// </summary>
+    /// <returns>The command-line text, with a leading exclamation mark replaced by the command prefix.</returns>
+    private string GetCommandLineText()
+    {
+        string commandLine = WpfUtils.GetInnerText(CommandBox);
+        if (commandLine.StartsWith('!'))
+        {
+            commandLine = $@"{CommandPrefix} {commandLine[1..]}";
+        }
+        return commandLine;
     }
 
     /// <summary>
