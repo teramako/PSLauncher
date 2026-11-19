@@ -65,7 +65,7 @@ public partial class MainWindow
                 string script = GetCommandLineText();
                 if (await ExecuteScript(script))
                 {
-                    CommandBox.Document.Blocks.Clear();
+                    ClearCommandBox();
                 }
                 break;
             case Key.Escape:
@@ -80,8 +80,7 @@ public partial class MainWindow
                 }
                 else
                 {
-                    CommandBox.Document.Blocks.Clear();
-                    CommandBox.CaretPosition = CommandBox.Document.ContentEnd;
+                    ClearCommandBox();
                 }
                 break;
             case Key.Tab:
@@ -107,6 +106,15 @@ public partial class MainWindow
             commandLine = $@"{CommandPrefix} {commandLine[1..]}";
         }
         return commandLine;
+    }
+
+    /// <summary>
+    /// Clears the command box and moves the caret to the end of the document.
+    /// </summary>
+    private void ClearCommandBox()
+    {
+        CommandBox.Document.Blocks.Clear();
+        CommandBox.CaretPosition = CommandBox.Document.ContentEnd;
     }
 
     /// <summary>
