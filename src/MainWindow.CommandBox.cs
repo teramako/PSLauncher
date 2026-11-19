@@ -73,6 +73,13 @@ public partial class MainWindow
                 Hide();
                 break;
             case Key.C when Keyboard.Modifiers is ModifierKeys.Control:
+                if (!CommandBox.Selection.IsEmpty)
+                {
+                    // Handle the default Ctrl-C key event for the RichTextBox
+                    // (this will likely copy the selected text)
+                    e.Handled = false;
+                    return;
+                }
                 e.Handled = true;
                 if (PowerShellRunner.Main.IsRunning)
                 {
