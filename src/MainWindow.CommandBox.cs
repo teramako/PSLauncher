@@ -119,12 +119,14 @@ public partial class MainWindow
     /// <param name="e"></param>
     private void CommandBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        CommandBoxHighlightTimer ??= new(TimeSpan.FromMicroseconds(60), DispatcherPriority.Background, Highlight_Tick, CommandBox.Dispatcher);
         CommandBoxHighlightTimer.Stop();
         CommandBoxHighlightTimer.Start();
     }
 
-    private DispatcherTimer? CommandBoxHighlightTimer;
+    private DispatcherTimer CommandBoxHighlightTimer => field ??= new(TimeSpan.FromMicroseconds(60),
+                                                                      DispatcherPriority.Background,
+                                                                      Highlight_Tick,
+                                                                      CommandBox.Dispatcher);
 
     /// <summary>
     /// <seealso cref="DispatcherTimer.Tick"/> event handler for <seealso cref="CommandBoxHighlightTimer"/>
@@ -133,7 +135,7 @@ public partial class MainWindow
     /// <param name="e"></param>
     private async void Highlight_Tick(object? sender, EventArgs e)
     {
-        CommandBoxHighlightTimer?.Stop();
+        CommandBoxHighlightTimer.Stop();
         HighlightCommandBox();
     }
 
