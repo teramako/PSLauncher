@@ -1,3 +1,4 @@
+using PSLauncher.Models;
 using PSLauncher.Shell;
 using System.Management.Automation.Language;
 using System.Windows;
@@ -16,6 +17,8 @@ public partial class MainWindow
         TextCompositionManager.AddPreviewTextInputStartHandler(CommandBox, CommandBox_TextCompositionStarted);
         TextCompositionManager.AddPreviewTextInputHandler(CommandBox, CommandBox_TextCompositionEnded);
     }
+
+    private CommandHistory History => field ??= new();
 
     /// <summary>
     /// IME conversion status for <seealso cref="CommandBox"/>
@@ -65,8 +68,10 @@ public partial class MainWindow
                 string script = GetCommandLineText();
                 if (await ExecuteScript(script))
                 {
+                    History.Add(script, DateTime.UtcNow - TimeSpan.FromMilliseconds(e.Timestamp));
                     ClearCommandBox();
                 }
+                History.ResetIndex();
                 break;
             case Key.Escape:
                 e.Handled = true;
@@ -88,6 +93,7 @@ public partial class MainWindow
                 else
                 {
                     ClearCommandBox();
+                    History.ResetIndex();
                 }
                 break;
             case Key.Tab:
@@ -97,6 +103,30 @@ public partial class MainWindow
             case Key.Space when Keyboard.Modifiers is ModifierKeys.Control:
                 e.Handled = true;
                 StartCompletionAsync(autoAcceptSingleMatch: false);
+                break;
+            case Key.P when Keyboard.Modifiers is ModifierKeys.Control:
+                e.Handled = true;
+                if (History.TryGetPrevious(out var previousHistory))
+                {
+                    ReplaceCommandLine(previousHistory.CommandLine);
+                }
+                else
+                {
+                    ClearCommandBox();
+                    History.ResetIndex();
+                }
+                break;
+            case Key.N when Keyboard.Modifiers is ModifierKeys.Control:
+                e.Handled = true;
+                if (History.TryGetNext(out var nextHistory))
+                {
+                    ReplaceCommandLine(nextHistory.CommandLine);
+                }
+                else
+                {
+                    ClearCommandBox();
+                    History.ResetIndex();
+                }
                 break;
         }
     }
@@ -122,6 +152,19 @@ public partial class MainWindow
     {
         CommandBox.Document.Blocks.Clear();
         CommandBox.CaretPosition = CommandBox.Document.ContentEnd;
+    }
+
+    /// <summary>
+    /// Replaces the command box text with the specified command line.
+    /// </summary>
+    /// <remarks>Updating the text raises the TextChanged event.</remarks>
+    /// <param name="commandLine">The command line to place in the command box.</param>
+    private void ReplaceCommandLine(string commandLine)
+    {
+        _ = new TextRange(CommandBox.Document.ContentStart, CommandBox.Document.ContentEnd)
+        {
+            Text = commandLine
+        };
     }
 
     /// <summary>
