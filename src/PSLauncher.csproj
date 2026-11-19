@@ -25,6 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="PSModules\PSLauncher\PSLauncher.psd1">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="PSModules\PSLauncher\PSLauncher.psm1">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
