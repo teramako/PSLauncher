@@ -71,20 +71,22 @@ public partial class MainWindow : Window
 
     private CancellationTokenSource? psExectionStopSource;
 
-    private async Task ExecuteScript(string script)
+    private async Task<bool> ExecuteScript(string script)
     {
         var runner = PowerShellRunner.Main;
         if (runner.IsRunning)
-            return;
+            return false;
 
         if (string.IsNullOrWhiteSpace(script))
         {
-            return;
+            return false;
         }
         if (script.StartsWith('!'))
         {
             script = $@"{CommandPrefix} {script[1..]}";
         }
+
+        bool isSuccess = false;
 
         runner.OnOutput += OnOutput;
 
@@ -107,6 +109,7 @@ public partial class MainWindow : Window
                 }
 
                 await ShowResult(psResults);
+                isSuccess = true;
             }
             catch (PipelineStoppedException stoppedException)
             {
@@ -133,6 +136,7 @@ public partial class MainWindow : Window
                 runner.OnOutput -= OnOutput;
                 UpdateStatus();
             }
+            return isSuccess;
         }
 
         void OnOutput(object? sender, PSOutputEventArgs e)

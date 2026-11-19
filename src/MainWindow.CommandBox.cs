@@ -63,7 +63,10 @@ public partial class MainWindow
             case Key.Enter:
                 e.Handled = true;
                 string script = WpfUtils.GetInnerText(CommandBox);
-                await ExecuteScript(script);
+                if (await ExecuteScript(script))
+                {
+                    CommandBox.Document.Blocks.Clear();
+                }
                 break;
             case Key.Escape:
                 e.Handled = true;
