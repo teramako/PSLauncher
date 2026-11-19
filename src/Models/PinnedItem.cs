@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace PSLauncher.Models;
 
-public class PinnedItem : ResultList
+public class PinnedItem : ObjectTreeList
 {
     public PinnedItem(object obj)
     {
@@ -94,11 +94,11 @@ public class PinnedItem : ResultList
             Items.Clear();
         }
 
-        IEnumerable<IResultData> items = RootObject switch
+        IEnumerable<ITreeItem> items = RootObject switch
         {
-            DirectoryInfo dir => FileResultData.ExtractObject(dir),
-            FileInfo file => [new FileResultData(file, 0)],
-            _ => ResultData.ExtractObject(RootObject),
+            DirectoryInfo dir => FileTreeItem.ExtractObject(dir),
+            FileInfo file => [new FileTreeItem(file, 0)],
+            _ => ObjectTreeItem.ExtractObject(RootObject),
         };
         foreach (var item in items)
         {

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Windows.Input;
 using PSLauncher.Models;
 using PSLauncher.Shell;
@@ -13,17 +14,50 @@ public partial class MainWindow
         data.UpdateItems();
     }
 
-    private void PinItem(object sender, ExecutedRoutedEventArgs e)
+    public void PinItem(object pinItem)
     {
-        if (e.Parameter is IResultData { RawValue: not null }  data)
-        {
-            PinnedItem.DataContext = new PinnedItem(data.RawValue);
-            RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", data.RawValue);
-        }
+        PinnedItem.DataContext = new PinnedItem(pinItem);
+
+        RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", pinItem);
     }
-    private void CanPinItem(object sender, CanExecuteRoutedEventArgs e)
+
+    public void PinItems(IEnumerable<object> selectedItems)
     {
-        e.CanExecute = true;
+        object pinItem;
+        List<object> items = [];
+        HashSet<Type> types = [];
+        foreach (var obj in selectedItems)
+        {
+            items.Add(obj);
+            types.Add(Utils.GetDataType(obj));
+        }
+
+        if (items.Count == 0)
+            return;
+        if (items.Count == 1)
+        {
+            pinItem = items[0];
+        }
+        else
+        {
+            if (types.Count == 1)
+            {
+                var t = types.First();
+                var typedArray = Array.CreateInstance(t, items.Count);
+                for (int i = 0; i < items.Count; i++)
+                {
+                    typedArray.SetValue(items[i], i);
+                }
+                pinItem = typedArray;
+            }
+            else
+            {
+                pinItem = items.ToArray();
+            }
+        }
+
+        PinnedItem.DataContext = new PinnedItem(pinItem);
+        RunspaceManager.MainRunspace.SessionStateProxy.SetVariable("PinnedItem", pinItem);
     }
 
     private void UnpinItem(object sender, ExecutedRoutedEventArgs e)

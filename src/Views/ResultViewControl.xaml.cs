@@ -16,10 +16,10 @@ public partial class ResultViewControl : UserControl, IResultContentControl
 
     public void FocusToContent()
     {
-        if (DataContext is not ResultList data)
+        if (DataContext is not ObjectTreeList treeList)
             return;
 
-        if (data.Kind is ResultDataKind.Simple)
+        if (treeList.Kind is ResultDataKind.Simple)
         {
             ResultText.Focus();
             ResultText.SelectAll();

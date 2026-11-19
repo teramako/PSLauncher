@@ -1,0 +1,154 @@
+<UserControl x:Class="PSLauncher.Views.ObjectListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:main="clr-namespace:PSLauncher"
+             xmlns:local="clr-namespace:PSLauncher.Views"
+             xmlns:model="clr-namespace:PSLauncher.Models"
+             xmlns:converter="clr-namespace:PSLauncher.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=model:ObjectTreeList}"
+             DataContextChanged="OnDataContextChanged">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="IconImage">
+            <Image Source="{Binding Icon}" Width="16" Height="16" d:DataContext="{d:DesignInstance Type=model:FileTreeItem}"/>
+        </ControlTemplate>
+        <!-- DataGrid columns for Object view -->
+        <DataGridTemplateColumn x:Key="NameColumn" Header="Name" Width="Auto" SortMemberPath="Name" IsReadOnly="True" CanUserReorder="False">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate d:DataType="model:ResultData">
+                    <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top">
+                        <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
+                                      Click="OnToggleRowExpander"/>
+                        <Control Template="{Binding NodeType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0" Focusable="False"/>
+                        <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
+                    </DockPanel>
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn x:Key="ValueColumn" Header="Value" Width="*" CanUserSort="False" SortMemberPath="Value" IsReadOnly="True">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate d:DataType="model:ResultData">
+                    <DockPanel>
+                        <Control Template="{Binding ValueType, Converter={StaticResource EnumIconConverter}}" Margin="0,0,3,0" Focusable="False"/>
+                        <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" MaxHeight="35"/>
+                    </DockPanel>
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTextColumn x:Key="TypeColumn" Header="Type" Binding="{Binding Type}" Width="Auto" IsReadOnly="True"
+                            SortMemberPath="Type"/>
+        <!-- DataGrid columns for File view -->
+        <DataGridTemplateColumn x:Key="FileNameColumn" Header="Name" Width="*" SortMemberPath="Name" IsReadOnly="True">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate d:DataType="model:FileResultData">
+                    <DockPanel Margin="{Binding Level, Converter={StaticResource IndentConverter}}" VerticalAlignment="Top" >
+                        <ToggleButton IsChecked="{Binding IsExpaned}" Style="{StaticResource ExpandToggleStyle}"
+                                      Click="OnToggleRowExpander"/>
+                        <Control Name="icon" Template="{StaticResource IconImage}" Margin="0,0,3,0" Focusable="False"/>
+                        <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
+                    </DockPanel>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
+                            <Setter TargetName="icon" Property="Template" Value="{Binding NodeType, Converter={StaticResource EnumIconConverter}}"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTextColumn x:Key="FileLastModifiedColumn" Header="Last Modified" Width="Auto"
+                            SortMemberPath="LastWriteTime"
+                            Binding="{Binding LastWriteTime, StringFormat='yyyy/MM/dd HH:mm:ss'}"
+                            IsReadOnly="True"/>
+        <DataGridTextColumn x:Key="FileSizeColumn" Header="Size" Width="Auto"
+                            SortMemberPath="Size"
+                            Binding="{Binding Size, StringFormat='N0'}" TextBlock.TextAlignment="Right"
+                            IsReadOnly="True"/>
+        <!-- Context Menu for Object view -->
+        <ContextMenu x:Key="ObjectsContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
+            <MenuItem Header="Open in Table View Window"
+                      Command="{x:Static main:Commands.OpenInTableViewWindow}"/>
+        </ContextMenu>
+        <!-- Context Menu for File view -->
+        <ContextMenu x:Key="FilesContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
+            <MenuItem Header="Open in Table View Window"
+                      Command="{x:Static main:Commands.OpenInTableViewWindow}"/>
+        </ContextMenu>
+        <!-- Context Menu for Table view -->
+        <ContextMenu x:Key="TableContextMenu"
+                     DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance Type=DataGrid}">
+            <MenuItem Header="Copy"
+                      Command="ApplicationCommands.Copy"/>
+            <MenuItem Header="Copy Row"
+                      Command="main:Commands.CopyRow"/>
+            <MenuItem Header="Pin"
+                      Command="main:Commands.PinItem"/>
+            <Separator/>
+            <MenuItem Header="Open in Objects Tree Window"
+                      Command="{x:Static main:Commands.OpenInObjectsTreeWindow}"/>
+            <MenuItem Header="Open in Files Tree Window"
+                      Command="{x:Static main:Commands.OpenInFilesTreeWindow}"/>
+            <MenuItem Header="Open in Table View Window"
+                      Command="{x:Static main:Commands.OpenInTableViewWindow}"/>
+        </ContextMenu>
+    </UserControl.Resources>
+
+    <DataGrid x:Name="Root"
+              AutoGenerateColumns="False"
+              SelectionMode="Extended" SelectionUnit="FullRow"
+              EnableColumnVirtualization="True"
+              EnableRowVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              ScrollViewer.CanContentScroll="True"
+              VerticalScrollBarVisibility="Auto"
+              HeadersVisibility="Column"
+              GotFocus="OnGotFocus"
+              PreviewKeyDown="OnRowPreviewKeyDown"
+              Sorting="OnSorting"
+              AutoGeneratingColumn="OnAutoGeneratingColumn"
+              AutoGeneratedColumns="OnAutoGeneratedColumns"
+              ItemsSource="{Binding Items}">
+        <DataGrid.CommandBindings>
+            <CommandBinding Command="ApplicationCommands.Copy" Executed="OnCopyValue" PreviewCanExecute="OnCanCopyValue"/>
+            <CommandBinding Command="{x:Static main:Commands.CopyRow}" Executed="OnCopyRow" PreviewCanExecute="OnCanCopyRow"/>
+            <CommandBinding Command="{x:Static main:Commands.PinItem}" Executed="PinItem" CanExecute="CanPinItem"/>
+            <CommandBinding Command="{x:Static main:Commands.OpenInObjectsTreeWindow}" Executed="OnOpenInObjectsTreeWindow" CanExecute="OnCanOpenInObjectsTreeWindow"/>
+            <CommandBinding Command="{x:Static main:Commands.OpenInFilesTreeWindow}" Executed="OnOpenInFilesTreeWindow" CanExecute="OnCanOpenInFilesTreeWindow"/>
+            <CommandBinding Command="{x:Static main:Commands.OpenInTableViewWindow}" Executed="OnOpenInTableViewWindow" CanExecute="OnCanOpenInTableViewWindow"/>
+        </DataGrid.CommandBindings>
+        <DataGrid.InputBindings>
+            <KeyBinding Command="ApplicationCommands.Copy" Key="C" Modifiers="Ctrl"/>
+            <KeyBinding Command="{x:Static main:Commands.CopyRow}" Key="C" Modifiers="Ctrl+Shift"/>
+        </DataGrid.InputBindings>
+    </DataGrid>
+</UserControl>

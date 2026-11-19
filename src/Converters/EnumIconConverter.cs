@@ -11,7 +11,7 @@ namespace PSLauncher.Converters;
 /// that returns the appropriate icon resource from <seealso cref="IconAttribute"/> of Enum value
 /// </summary>
 /// <remarks>
-/// Used in WPF binding to display different icons for each type of <seealso cref="IResultData"/>
+/// Used in WPF binding to display different icons for each type of <seealso cref="ITreeItem"/>
 /// ConvertBack is not implemented.
 /// </remarks>
 internal class EnumIconConverter : IMultiValueConverter, IValueConverter

@@ -16,6 +16,7 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid Width="16" Height="16">
                         <ContentPresenter/>
+                        <Rectangle Width="16" Height="16" Fill="Transparent"/>
                         <Path x:Name="Arrow" Fill="Gray" Data="M 6,4 L 6,12 L 10,8 Z"/>
                     </Grid>
                     <ControlTemplate.Triggers>

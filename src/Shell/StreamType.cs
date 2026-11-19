@@ -1,4 +1,4 @@
-﻿using System.Management.Automation.Language;
+using System.Management.Automation.Language;
 
 namespace PSLauncher.Shell;
 

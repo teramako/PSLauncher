@@ -122,6 +122,7 @@ internal static class RunspaceManager
             new SessionStateVariableEntry("PSModulePath",
                                           string.Join(Path.PathSeparator, psModulePaths),
                                           "PSModulePath for PSLauncher"));
+        initialSessionState.StartupScripts.Add(Path.Join(myDocumentsDir, "PSLauncher", "profile.ps1"));
         return initialSessionState;
 
     });

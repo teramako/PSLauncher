@@ -36,7 +36,6 @@
         <CommandBinding Command="ApplicationCommands.Close" Executed="ExitApplication"/>
         <CommandBinding Command="local:Commands.FocusToResultContent" Executed="FocusToResultContent"/>
         <CommandBinding Command="local:Commands.StopExecution" Executed="StopExcution" CanExecute="CanStopExecution"/>
-        <CommandBinding Command="local:Commands.PinItem" Executed="PinItem" CanExecute="CanPinItem"/>
         <CommandBinding Command="local:Commands.UnpinItem" Executed="UnpinItem" CanExecute="CanUnpinItem"/>
     </Window.CommandBindings>
 
@@ -91,7 +90,7 @@
                                         <TextBox Name="ResultText" Style="{StaticResource ResultTextBoxStyle}"
                                                  Text="{Binding DisplayData, Mode=OneWay}"
                                                  IsEnabled="{Binding HasDisplayData}"/>
-                                        <view:ExpandableDataGridControl x:Name="DetailDataGrid" DataContext="{Binding}" MaxHeight="200"/>
+                                        <view:ObjectListView x:Name="DetailDataGrid" DataContext="{Binding}" MaxHeight="200"/>
                                     </StackPanel>
                                 </ContentControl>
                             </Popup>

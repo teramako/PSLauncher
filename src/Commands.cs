@@ -20,5 +20,8 @@ public static class Commands
     {
         InputGestures = { new KeyGesture(Key.C, ModifierKeys.Control | ModifierKeys.Shift) }
     };
+    public static readonly RoutedUICommand OpenInObjectsTreeWindow = new("Open in Objects Tree Window", "OpenInObjectsTreeWindow", typeof(Commands));
+    public static readonly RoutedUICommand OpenInFilesTreeWindow = new("Open in Files Tree Window", "OpenInFilesTreeWindow", typeof(Commands));
+    public static readonly RoutedUICommand OpenInTableViewWindow = new("Open in Table View Window", "OpenInTableViewWindow", typeof(Commands));
     #endregion
 }

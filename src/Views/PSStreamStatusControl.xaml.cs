@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using PSLauncher.Models;
 using PSLauncher.Shell;
 
@@ -10,11 +11,11 @@ public partial class PSStreamStatusControl : UserControl
     {
         InitializeComponent();
     }
-    public ResultList ErrorList { get; } = new() { Description = "Error", Kind = ResultDataKind.Objects };
-    public ResultList WarningList { get; } = new() { Description = "Warning", Kind = ResultDataKind.Objects };
-    public ResultList VerboseList { get; } = new() { Description = "Verbose", Kind = ResultDataKind.Objects };
-    public ResultList InformationList { get; } = new() { Description = "Information", Kind = ResultDataKind.Objects };
-    public ResultList DebugList { get; } = new() { Description = "Debug", Kind = ResultDataKind.Objects };
+    public ObjectTreeList ErrorList { get; } = new() { Description = "Error", Kind = ResultDataKind.Objects };
+    public ObjectTreeList WarningList { get; } = new() { Description = "Warning", Kind = ResultDataKind.Objects };
+    public ObjectTreeList VerboseList { get; } = new() { Description = "Verbose", Kind = ResultDataKind.Objects };
+    public ObjectTreeList InformationList { get; } = new() { Description = "Information", Kind = ResultDataKind.Objects };
+    public ObjectTreeList DebugList { get; } = new() { Description = "Debug", Kind = ResultDataKind.Objects };
 
     public void AddRecord(PSDataRecord record)
     {
@@ -42,10 +43,22 @@ public partial class PSStreamStatusControl : UserControl
 
     public void ClearStreams()
     {
-        ErrorList.Clear();
-        WarningList.Clear();
-        VerboseList.Clear();
-        InformationList.Clear();
-        DebugList.Clear();
+        ResetStatusBarItem(ErrorStatus);
+        ResetStatusBarItem(WarningStatus);
+        ResetStatusBarItem(VerboseStatus);
+        ResetStatusBarItem(InformationStatus);
+        ResetStatusBarItem(DebugStatus);
+    }
+
+    private static void ResetStatusBarItem(StatusBarItem item)
+    {
+        if (item.DataContext is ObjectTreeList treeList)
+        {
+            treeList.Clear();
+        }
+        if (WpfUtils.TryFindChild<ToggleButton>(item, out var toggleButton))
+        {
+            toggleButton.IsChecked = false;
+        }
     }
 }
