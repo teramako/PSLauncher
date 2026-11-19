@@ -7,6 +7,7 @@ namespace PSLauncher.PSCommands;
 public class GetGridColumnCommand : Cmdlet
 {
     [Parameter(Position = 0)]
+    [ArgumentCompleter(typeof(GridColumnTypeCompleter))]
     public string? Type { get; set; }
 
     private Type? _type;

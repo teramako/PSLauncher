@@ -7,6 +7,7 @@ namespace PSLauncher.PSCommands;
 public class SetGridColumnCommand: Cmdlet
 {
     [Parameter(Mandatory = true, Position = 0)]
+    [ArgumentCompleter(typeof(GridColumnTypeCompleter))]
     public string? Type { get; set; }
 
     [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true)]
