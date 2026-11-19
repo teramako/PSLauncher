@@ -338,7 +338,7 @@ public partial class ObjectListView : UserControl, IResultContentControl
             ? ObjectTreeList.Build(items[0], ResultDataKind.Objects)
             : ObjectTreeList.Build(items, ResultDataKind.Objects);
 
-        if (treeList.Count == 0)
+        if (treeList is null)
             return;
 
         var win = new ObjectsViewWindow(treeList);
